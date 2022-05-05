@@ -20,7 +20,6 @@
 namespace FacturaScripts\Core\Model\Base;
 
 use FacturaScripts\Core\Base\DataBase;
-use FacturaScripts\Core\Base\DataBase\DataBaseTools;
 use FacturaScripts\Core\Base\ToolBox;
 use FacturaScripts\Core\Lib\Import\CSVImport;
 
@@ -121,17 +120,6 @@ abstract class ModelCore
     {
         if (self::$dataBase === null) {
             self::$dataBase = new DataBase();
-
-            $tables = $this->toolBox()->cache()->get('fs_checked_tables');
-            if (is_array($tables) && !empty($tables)) {
-                self::$checkedTables = $tables;
-            }
-        }
-
-        if (static::tableName() !== '' && false === in_array(static::tableName(), self::$checkedTables, false) && $this->checkTable()) {
-            $this->toolBox()->i18nLog()->debug('table-checked', ['%tableName%' => static::tableName()]);
-            self::$checkedTables[] = static::tableName();
-            $this->toolBox()->cache()->set('fs_checked_tables', self::$checkedTables);
         }
 
         $this->loadModelFields(self::$dataBase, static::tableName());
@@ -266,33 +254,6 @@ abstract class ModelCore
         }
 
         return $data;
-    }
-
-    /**
-     * Checks and updates the structure of the table if necessary.
-     *
-     * @return bool
-     */
-    private function checkTable(): bool
-    {
-        $xmlCols = [];
-        $xmlCons = [];
-        if (false === DataBaseTools::getXmlTable(static::tableName(), $xmlCols, $xmlCons)) {
-            $this->toolBox()->i18nLog()->critical('error-on-xml-file', ['%fileName%' => static::tableName() . '.xml']);
-            return false;
-        }
-
-        $sql = self::$dataBase->tableExists(static::tableName()) ?
-            DataBaseTools::checkTable(static::tableName(), $xmlCols, $xmlCons) :
-            DataBaseTools::generateTable(static::tableName(), $xmlCols, $xmlCons) . $this->install();
-
-        if ($sql !== '' && false === self::$dataBase->exec($sql)) {
-            $this->toolBox()->i18nLog()->critical('check-table', ['%tableName%' => static::tableName()]);
-            $this->toolBox()->cache()->clear();
-            return false;
-        }
-
-        return true;
     }
 
     /**

@@ -7,6 +7,7 @@
 /Plugins/
 /vendor/
 .DS_Store
+.env
 .htaccess
 config.php
 config-mysql.php

@@ -20,6 +20,7 @@
 namespace FacturaScripts\Core\Base;
 
 use FacturaScripts\Core\DataSrc\Empresas;
+use FacturaScripts\Core\Html;
 use FacturaScripts\Dinamic\Lib\AssetManager;
 use FacturaScripts\Dinamic\Lib\MultiRequestProtection;
 use FacturaScripts\Dinamic\Model\Empresa;
@@ -112,15 +113,9 @@ class Controller
      */
     public $user = false;
 
-    /**
-     * Initialize all objects and properties.
-     *
-     * @param string $className
-     * @param string $uri
-     */
-    public function __construct(string $className, string $uri = '')
+    public function __construct(string $uri)
     {
-        $this->className = $className;
+        $this->className = substr(strrchr(static::class, "\\"), 1);
         $this->dataBase = new DataBase();
         $this->empresa = new Empresa();
         $this->multiRequestProtection = new MultiRequestProtection();
@@ -132,7 +127,7 @@ class Controller
         $this->title = empty($pageData) ? $this->className : $this->toolBox()->i18n()->trans($pageData['title']);
 
         AssetManager::clear();
-        AssetManager::setAssetsForPage($className);
+        AssetManager::setAssetsForPage($this->className);
 
         $this->checkPHPversion(7.2);
     }
@@ -246,6 +241,13 @@ class Controller
         }
     }
 
+    public function run(): void
+    {
+        echo Html::render($this->template, [
+            'fsc' => $this,
+        ]);
+    }
+
     /**
      * Set the template to use for this controller.
      *
@@ -303,7 +305,7 @@ class Controller
      *   - the token does not exist
      *   - the token is invalid
      *   - the token is duplicated
-     * 
+     *
      * @return bool
      */
     protected function validateFormToken(): bool

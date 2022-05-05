@@ -13,6 +13,11 @@ composer install
 npm install
 ```
 
+## Run
+```
+php -S localhost:8000 index.php
+```
+
 ## Documentation
 https://facturascripts.com/ayuda
 
@@ -20,7 +25,8 @@ https://facturascripts.com/ayuda
 https://facturascripts.com/contacto
 
 ### Security Vulnerabilities
-If you discover a security vulnerability within FacturaScripts, please send an e-mail to Carlos Garcia via [carlos@facturascripts.com](mailto:carlos@facturascripts.com)
+If you discover a security vulnerability within FacturaScripts, please send an e-mail to Carlos Garcia via
+[carlos@facturascripts.com](mailto:carlos@facturascripts.com)
 
 ## Translations
 https://facturascripts.com/traducciones
