@@ -59,6 +59,17 @@ class Files implements ControllerInterface
         readfile($filePath);
     }
 
+    public static function isFileSafe(string $filePath): bool
+    {
+        $parts = explode('.', $filePath);
+        $safe = [
+            'avi', 'css', 'csv', 'eot', 'gif', 'gz', 'ico', 'jpeg', 'jpg', 'js',
+            'json', 'map', 'mkv', 'mp4', 'ogg', 'pdf', 'png', 'sql', 'svg',
+            'ttf', 'webm', 'woff', 'woff2', 'xls', 'xlsx', 'xml', 'xsig', 'zip'
+        ];
+        return empty($parts) || count($parts) === 1 || in_array(end($parts), $safe, true);
+    }
+
     public function run(): void
     {
     }
@@ -80,16 +91,5 @@ class Files implements ControllerInterface
         }
 
         return mime_content_type($filePath);
-    }
-
-    private function isFileSafe(string $filePath): bool
-    {
-        $parts = explode('.', $filePath);
-        $safe = [
-            'avi', 'css', 'csv', 'eot', 'gif', 'gz', 'ico', 'jpeg', 'jpg', 'js',
-            'json', 'map', 'mkv', 'mp4', 'ogg', 'pdf', 'png', 'sql', 'svg',
-            'ttf', 'webm', 'woff', 'woff2', 'xls', 'xlsx', 'xml', 'xsig', 'zip'
-        ];
-        return empty($parts) || count($parts) === 1 || in_array(end($parts), $safe, true);
     }
 }

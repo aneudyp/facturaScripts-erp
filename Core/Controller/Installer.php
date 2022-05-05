@@ -1,77 +1,30 @@
 <?php
-/**
- * This file is part of FacturaScripts
- * Copyright (C) 2013-2022 Carlos Garcia Gomez <carlos@facturascripts.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 
-namespace FacturaScripts\Core\App;
+namespace FacturaScripts\Core\Controller;
 
 use DateTimeZone;
 use FacturaScripts\Core\Base\PluginManager;
 use FacturaScripts\Core\Base\ToolBox;
-use mysqli;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use FacturaScripts\Core\Contract\ControllerInterface;
+use FacturaScripts\Core\Html;
 
-/**
- * Description of AppInstaller
- *
- * @author Carlos García Gómez <carlos@facturascripts.com>
- */
-final class AppInstaller
+class Installer implements ControllerInterface
 {
-
-    /**
-     * Request on which we can get data.
-     *
-     * @var Request
-     */
-    private $request;
-
-    /**
-     * Starts installer and run it.
-     */
-    public function __construct()
+    public function __construct(string $url)
     {
-        $this->request = Request::createFromGlobals();
-        define('FS_LANG', $this->request->get('fs_lang', $this->getUserLanguage()));
-
-        $installed = false;
-        if (false === $this->searchErrors() && $this->request->getMethod() === 'POST' &&
-            $this->createDataBase() && $this->createFolders() && $this->saveHtaccess() && $this->saveInstall()) {
-            $installed = true;
-        }
-
-        if ($installed && !empty($this->request->get('unattended', ''))) {
-            echo 'OK';
-        } elseif ($installed) {
-            $this->render('Installer/Redir.html.twig');
-        } elseif ('TRUE' === $this->request->get('phpinfo', '')) {
-            /** @noinspection ForgottenDebugOutputInspection */
-            phpinfo();
-        } else {
-            $this->render();
-        }
     }
 
-    /**
-     * Check database connection and creates the database if needed.
-     *
-     * @return bool
-     */
+    public function run(): void
+    {
+        $templateVars = [
+            'license' => file_get_contents(FS_FOLDER . DIRECTORY_SEPARATOR . 'COPYING'),
+            'memcache_prefix' => ToolBox::utils()->randomString(8),
+            'timezones' => DateTimeZone::listIdentifiers(),
+            'version' => PluginManager::CORE_VERSION
+        ];
+        echo Html::render('Installer/install.html.twig', $templateVars);
+    }
+
     private function createDataBase(): bool
     {
         $dbData = [
@@ -111,11 +64,6 @@ final class AppInstaller
         return false;
     }
 
-    /**
-     * If the needed directories are created or already exist, returns true. False when not.
-     *
-     * @return bool
-     */
     private function createFolders(): bool
     {
         // Check each needed folder to deploy
@@ -131,23 +79,6 @@ final class AppInstaller
         return true;
     }
 
-    /**
-     * Returns the request uri from server.
-     *
-     * @return string
-     */
-    private function getUri(): string
-    {
-        $uri = $this->request->getBasePath();
-        return ('/' === substr($uri, -1)) ? substr($uri, 0, -1) : $uri;
-    }
-
-    /**
-     * Returns the user language to show the proper installation language in the selector.
-     * When the JSON file doesn't exist, returns en_EN
-     *
-     * @return string
-     */
     private function getUserLanguage(): string
     {
         $dataLanguage = explode(';', filter_input(INPUT_SERVER, 'HTTP_ACCEPT_LANGUAGE'));
@@ -155,45 +86,12 @@ final class AppInstaller
         return file_exists(FS_FOLDER . '/Core/Translation/' . $userLanguage . '.json') ? $userLanguage : 'en_EN';
     }
 
-    /**
-     * Renders HTML.
-     *
-     * @param string $template
-     */
-    private function render(string $template = 'Installer/Install.html.twig')
-    {
-        // HTML template variables
-        $templateVars = [
-            'license' => file_get_contents(FS_FOLDER . DIRECTORY_SEPARATOR . 'COPYING'),
-            'memcache_prefix' => ToolBox::utils()->randomString(8),
-            'timezones' => DateTimeZone::listIdentifiers(),
-            'version' => PluginManager::CORE_VERSION
-        ];
-
-        // Load the template engine
-        $webRender = new WebRender();
-
-        // Generate and return the HTML
-        $response = new Response($webRender->render($template, $templateVars), Response::HTTP_OK);
-        $response->send();
-    }
-
-    /**
-     * Saves the htaccess file for the apache server.
-     *
-     * @return bool
-     */
     private function saveHtaccess(): bool
     {
         $contentFile = ToolBox::files()->extractFromMarkers(FS_FOLDER . DIRECTORY_SEPARATOR . 'htaccess-sample', 'FacturaScripts code');
         return ToolBox::files()->insertWithMarkers($contentFile, FS_FOLDER . DIRECTORY_SEPARATOR . '.htaccess', 'FacturaScripts code');
     }
 
-    /**
-     * Saves install parameters to config file.
-     *
-     * @return bool
-     */
     private function saveInstall(): bool
     {
         $file = fopen(FS_FOLDER . '/config.php', 'wb');
@@ -232,11 +130,6 @@ final class AppInstaller
         return false;
     }
 
-    /**
-     * Check for common errors.
-     *
-     * @return bool
-     */
     private function searchErrors(): bool
     {
         $errors = false;
@@ -266,13 +159,6 @@ final class AppInstaller
         return $errors;
     }
 
-    /**
-     * Test the MySQL connection and creates the database if needed.
-     *
-     * @param array $dbData
-     *
-     * @return bool
-     */
     private function testMysql(array $dbData): bool
     {
         if ($dbData['socket'] !== '') {
@@ -291,13 +177,6 @@ final class AppInstaller
         return (bool)$connection->query($sqlCrearBD);
     }
 
-    /**
-     * Test the PostgreSQL connection and creates the database if needed.
-     *
-     * @param array $dbData
-     *
-     * @return bool
-     */
     private function testPostgreSql(array $dbData): bool
     {
         $connectionStr = 'host=' . $dbData['host'] . ' port=' . $dbData['port'];
