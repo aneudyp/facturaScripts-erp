@@ -21,6 +21,7 @@ namespace FacturaScripts\Core\Base;
 
 use FacturaScripts\Core\DataSrc\Empresas;
 use FacturaScripts\Core\Html;
+use FacturaScripts\Core\KernelException;
 use FacturaScripts\Dinamic\Lib\AssetManager;
 use FacturaScripts\Dinamic\Lib\MultiRequestProtection;
 use FacturaScripts\Dinamic\Model\Empresa;
@@ -243,6 +244,31 @@ class Controller
 
     public function run(): void
     {
+        $cookieNick = $this->request->cookies->get('fsNick', '');
+        if ($cookieNick === '') {
+            throw new KernelException('LoginToContinue', 'login-to-continue');
+        }
+
+        $user = new User();
+        if (false === $user->loadFromCode($cookieNick) && $user->enabled) {
+            ToolBox::i18nLog()->warning('login-user-not-found', ['%nick%' => $cookieNick]);
+            throw new KernelException('LoginToContinue', 'login-user-not-found');
+        }
+
+        if (false === $user->verifyLogkey($this->request->cookies->get('fsLogkey'))) {
+            ToolBox::i18nLog()->warning('login-cookie-fail');
+            // clear fsNick cookie
+            setcookie('fsNick', '', time() - FS_COOKIES_EXPIRE, '/');
+            throw new KernelException('LoginToContinue', 'login-cookie-fail');
+        }
+
+        $response = new Response();
+        $this->updateCookies($user, $response);
+        ToolBox::i18nLog()->debug('login-ok', ['%nick%' => $user->nick]);
+        ToolBox::log()::setContext('nick', $user->nick);
+
+        $permissions = new ControllerPermissions($user, $this->getClassName());
+        $this->privateCore($response, $user, $permissions);
         echo Html::render($this->template, [
             'fsc' => $this,
         ]);
@@ -267,6 +293,21 @@ class Controller
     public static function toolBox(): ToolBox
     {
         return new ToolBox();
+    }
+
+    private function updateCookies(User &$user, Response &$response)
+    {
+        if (time() - strtotime($user->lastactivity) > 3600) {
+            $ipAddress = ToolBox::ipFilter()->getClientIp();
+            $user->updateActivity($ipAddress);
+            $user->save();
+
+            $expire = time() + FS_COOKIES_EXPIRE;
+            $response->headers->setCookie(new Cookie('fsNick', $user->nick, $expire, FS_ROUTE));
+            $response->headers->setCookie(new Cookie('fsLogkey', $user->logkey, $expire, FS_ROUTE));
+            $response->headers->setCookie(new Cookie('fsLang', $user->langcode, $expire, FS_ROUTE));
+            $response->headers->setCookie(new Cookie('fsCompany', $user->idempresa, $expire, FS_ROUTE));
+        }
     }
 
     /**
