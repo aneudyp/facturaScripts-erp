@@ -73,6 +73,7 @@ final class Kernel
         self::$routes = [
             '/' => '\\FacturaScripts\\Core\\Controller\\Dashboard',
             '/api/4/' => '\\FacturaScripts\\Core\\Controller\\ApiRoot',
+            '/Core/*' => '\\FacturaScripts\\Core\\Controller\\Files',
             '/deploy' => '\\FacturaScripts\\Core\\Controller\\Deploy',
             '/Dinamic/*' => '\\FacturaScripts\\Core\\Controller\\Files',
             '/install' => '\\FacturaScripts\\Core\\Controller\\Installer',

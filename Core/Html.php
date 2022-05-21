@@ -45,6 +45,26 @@ final class Html
         return self::twig()->render($template, array_merge($params, $default));
     }
 
+    private static function assetFunction(): TwigFunction
+    {
+        return new TwigFunction('asset', function ($string) {
+            $path = FS_ROUTE . '/';
+            if (substr($string, 0, strlen($path)) == $path) {
+                return $string;
+            }
+            return str_replace('//', '/', $path . $string);
+        });
+    }
+
+    private static function attachedFileFunction(): TwigFunction
+    {
+        return new TwigFunction('attachedFile', function ($idfile) {
+            $attached = new AttachedFile();
+            $attached->loadFromCode($idfile);
+            return $attached;
+        });
+    }
+
     private static function twig(): Environment
     {
         if (!isset(self::$twig)) {
@@ -52,15 +72,8 @@ final class Html
             $loader = new FilesystemLoader($path);
             self::$twig = new Environment($loader);
 
-            // asset() function
-            $assetFunction = new TwigFunction('asset', function ($string) {
-                $path = Setup::get('route') . '/';
-                if (str_starts_with($string, $path)) {
-                    return $string;
-                }
-                return str_replace('//', '/', $path . $string);
-            });
-            self::$twig->addFunction($assetFunction);
+            self::$twig->addFunction(self::assetFunction());
+            self::$twig->addFunction(self::attachedFileFunction());
         }
 
         return self::$twig;

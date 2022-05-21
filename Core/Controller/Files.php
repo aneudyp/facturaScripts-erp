@@ -30,7 +30,7 @@ class Files implements ControllerInterface
     {
         // favicon.ico
         if ('/favicon.ico' == $url) {
-            $filePath = Setup::get('folder') . '/Dinamic/Assets/Images/favicon.ico';
+            $filePath = Setup::get('folder') . '/Core/Assets/Images/favicon.ico';
             header('Content-Type: ' . $this->getMime($filePath));
             readfile($filePath);
             return;
