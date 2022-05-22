@@ -19,11 +19,21 @@
 
 namespace FacturaScripts\Core;
 
+use FacturaScripts\Core\Model\Settings;
+
 final class Setup
 {
     private static $data = [];
 
-    public static function get(string $property, mixed $default = null): mixed
+    private static $settings = [];
+
+    /**
+     * @param string $property
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public static function get(string $property, $default = null)
     {
         // properties are case-insensitive
         $name = strtolower($property);
@@ -62,7 +72,19 @@ final class Setup
         }
     }
 
-    public static function set(string $property, mixed $value): void
+    public static function read(string $group, string $property, $default = null)
+    {
+        if (!isset(self::$settings[$group][$property])) {
+            $settings = new Settings();
+            if ($settings->loadFromCode($group)) {
+                self::$settings[$group] = $settings->properties;
+            }
+        }
+
+        return self::$settings[$group][$property] ?? $default;
+    }
+
+    public static function set(string $property, $value): void
     {
         // properties are case-insensitive
         $name = strtolower($property);

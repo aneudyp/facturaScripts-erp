@@ -19,6 +19,8 @@
 
 namespace FacturaScripts\Core;
 
+use FacturaScripts\Core\Lib\AssetManager;
+use FacturaScripts\Core\Model\AttachedFile;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -38,9 +40,10 @@ final class Html
     public static function render(string $template, array $params = []): string
     {
         $default = [
+            'assetManager' => new AssetManager(),
             'i18n' => new Translator(),
-            'langcode' => Setup::get('langcode', 'es_ES'),
-            'log' => new Logger(),
+            'logs' => Logger::read(Logger::DEFAULT_CHANNEL),
+            'setup' => new Setup()
         ];
         return self::twig()->render($template, array_merge($params, $default));
     }
@@ -65,6 +68,13 @@ final class Html
         });
     }
 
+    private static function formTokenFunction(): TwigFunction
+    {
+        return new TwigFunction('formToken', function () {
+            return '<input type="hidden" name="_token" value="' . FormToken::newToken() . '"/>';
+        }, ['is_safe' => ['html']]);
+    }
+
     private static function twig(): Environment
     {
         if (!isset(self::$twig)) {
@@ -74,6 +84,7 @@ final class Html
 
             self::$twig->addFunction(self::assetFunction());
             self::$twig->addFunction(self::attachedFileFunction());
+            self::$twig->addFunction(self::formTokenFunction());
         }
 
         return self::$twig;

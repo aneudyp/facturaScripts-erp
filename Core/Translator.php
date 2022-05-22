@@ -19,10 +19,10 @@
 
 namespace FacturaScripts\Core;
 
-class Translator
+final class Translator
 {
     public const DEFAULT_LANG = 'es_ES';
-    public const FOLDERS = ['Src/Translation', 'Dynamic/Translation', 'MyFiles/Translation'];
+    public const FOLDERS = ['Core/Translation', 'Dynamic/Translation', 'MyFiles/Translation'];
 
     private $lang;
     private static $languages = [];
@@ -31,6 +31,21 @@ class Translator
     public function __construct(string $langcode = '')
     {
         $this->setLang($langcode);
+    }
+
+    public function customTrans(string $langcode, string $txt, array $parameters = []): string
+    {
+        $this->load($langcode);
+
+        $key = $txt . '@' . $langcode;
+        $translation = self::$translations[$key] ?? $txt;
+
+        // replaces the parameters on the translation
+        return str_replace(
+            array_keys($parameters),
+            array_values($parameters),
+            $translation
+        );
     }
 
     public function getAvailableLanguages(): array
@@ -56,43 +71,33 @@ class Translator
         $this->lang = empty($langcode) ?
             Setup::get('langcode', self::DEFAULT_LANG) :
             $langcode;
-
-        $this->load();
     }
 
     public function trans(string $txt, array $parameters = []): string
     {
-        $key = $txt . '@' . $this->getLang();
-        $translation = self::$translations[$key] ?? $txt;
-
-        // replaces the parameters on the translation
-        return str_replace(
-            array_keys($parameters),
-            array_values($parameters),
-            $translation
-        );
+        return $this->customTrans($this->getLang(), $txt, $parameters);
     }
 
-    private function load(): void
+    private function load(string $langcode): void
     {
-        if (in_array($this->getLang(), self::$languages, true)) {
+        if (in_array($langcode, self::$languages, true)) {
             return;
         }
 
         // load the translation files of the selected language
         foreach (self::FOLDERS as $folder) {
-            $fileName = $folder . '/' . $this->getLang() . '.json';
+            $fileName = $folder . '/' . $langcode . '.json';
             if (false === file_exists($fileName)) {
                 continue;
             }
 
             $data = file_get_contents($fileName);
             foreach (json_decode($data, true) as $code => $translation) {
-                self::$translations[$code . '@' . $this->getLang()] = $translation;
+                self::$translations[$code . '@' . $langcode] = $translation;
             }
         }
 
         // save the language in the loaded list
-        self::$languages[] = $this->getLang();
+        self::$languages[] = $langcode;
     }
 }

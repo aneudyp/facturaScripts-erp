@@ -21,7 +21,7 @@ namespace FacturaScripts\Core;
 
 use FacturaScripts\Core\Bridge\LoggerFileStorage;
 
-class Logger
+final class Logger
 {
     const DEFAULT_CHANNEL = 'master';
     const LIMIT = 10000;
