@@ -133,7 +133,7 @@ class Login implements ControllerInterface
         // get ip count on the list
         $currentIp = Tools::getClientIp();
         $ipCount = 0;
-        foreach (self::getIpList() as $item) {
+        foreach ($this->getIpList() as $item) {
             if ($item['ip'] === $currentIp) {
                 $ipCount++;
             }
@@ -144,7 +144,7 @@ class Login implements ControllerInterface
 
         // get user count on the list
         $userCount = 0;
-        foreach (self::getUserList() as $item) {
+        foreach ($this->getUserList() as $item) {
             if ($item['user'] === $username) {
                 $userCount++;
             }
@@ -189,7 +189,7 @@ class Login implements ControllerInterface
     private function saveIncident(string $user = ''): void
     {
         // add the current IP to the list
-        $ipList = self::getIpList();
+        $ipList = $this->getIpList();
         $ipList[] = [
             'ip' => Tools::getClientIp(),
             'time' => time()
@@ -204,7 +204,7 @@ class Login implements ControllerInterface
         }
 
         // add the current user to the list
-        $userList = self::getUserList();
+        $userList = $this->getUserList();
         $userList[] = [
             'user' => $user,
             'time' => time()
