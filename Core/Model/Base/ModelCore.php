@@ -226,7 +226,7 @@ abstract class ModelCore
                     break;
 
                 default:
-                    $this->{$key} = ($value === null && $field['is_nullable'] === 'NO') ? '' : $value;
+                    $this->{$key} = ($value === null && $field['nullable'] === false) ? '' : $value;
             }
         }
     }
@@ -272,7 +272,7 @@ abstract class ModelCore
             return false;
         }
 
-        return $field['is_nullable'] === 'NO' ? false : null;
+        return $field['nullable'];
     }
 
     /**
@@ -289,7 +289,7 @@ abstract class ModelCore
             return (float)$value;
         }
 
-        return $field['is_nullable'] === 'NO' ? 0.0 : null;
+        return $field['nullable'] ? null : 0.0;
     }
 
     /**
@@ -310,7 +310,7 @@ abstract class ModelCore
             return null;
         }
 
-        return $field['is_nullable'] === 'NO' ? 0 : null;
+        return $field['nullable'] ? null : 0;
     }
 
     protected static function toolBox(): ToolBox

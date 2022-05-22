@@ -256,6 +256,9 @@ class Login implements ControllerInterface
         setcookie('fsNick', $user->nick, $expiration, Setup::get('route'));
         setcookie('fsLogkey', $user->logkey, $expiration, Setup::get('route'));
         setcookie('fsLang', $user->langcode, $expiration, Setup::get('route'));
+
+        // redirect to the main page
+        header('Location: ' . $user->homepage);
     }
 
     private function logoutAction(Request $request): void
