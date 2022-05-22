@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class Login implements ControllerInterface
 {
+    const INCIDENT_EXPIRATION_TIME = 600;
     const IP_LIST = 'login-ip-list';
     const MAX_INCIDENT_COUNT = 5;
     const USER_LIST = 'login-user-list';
@@ -79,9 +80,15 @@ class Login implements ControllerInterface
             return;
         }
 
+        if ($this->userHasManyIncidents($username)) {
+            Tools::i18nLog()->warning('login-incident-count-exceeded');
+            return;
+        }
+
         $user = new User();
         if (false === $user->loadFromCode($username)) {
             Tools::i18nLog()->warning('login-user-not-found');
+            $this->saveIncident($username);
             return;
         }
 
@@ -93,6 +100,7 @@ class Login implements ControllerInterface
         $user->setPassword($password);
         if (false === $user->save()) {
             Tools::i18nLog()->warning('login-user-not-saved');
+            $this->saveIncident($username);
             return;
         }
 
@@ -118,6 +126,92 @@ class Login implements ControllerInterface
         }
 
         return true;
+    }
+
+    private function userHasManyIncidents(string $username = ''): bool
+    {
+        // get ip count on the list
+        $currentIp = Tools::getClientIp();
+        $ipCount = 0;
+        foreach (self::getIpList() as $item) {
+            if ($item['ip'] === $currentIp) {
+                $ipCount++;
+            }
+        }
+        if ($ipCount > self::MAX_INCIDENT_COUNT) {
+            return true;
+        }
+
+        // get user count on the list
+        $userCount = 0;
+        foreach (self::getUserList() as $item) {
+            if ($item['user'] === $username) {
+                $userCount++;
+            }
+        }
+        return $userCount > self::MAX_INCIDENT_COUNT;
+    }
+
+    private function getIpList(): array
+    {
+        $ipList = Cache::get(self::IP_LIST);
+        if (false === is_array($ipList)) {
+            return [];
+        }
+
+        // remove expired items
+        $newList = [];
+        foreach ($ipList as $item) {
+            if (time() - $item['time'] < self::INCIDENT_EXPIRATION_TIME) {
+                $newList[] = $item;
+            }
+        }
+        return $newList;
+    }
+
+    private function getUserList(): array
+    {
+        $userList = Cache::get(self::USER_LIST);
+        if (false === is_array($userList)) {
+            return [];
+        }
+
+        // remove expired items
+        $newList = [];
+        foreach ($userList as $item) {
+            if (time() - $item['time'] < self::INCIDENT_EXPIRATION_TIME) {
+                $newList[] = $item;
+            }
+        }
+        return $newList;
+    }
+
+    private function saveIncident(string $user = ''): void
+    {
+        // add the current IP to the list
+        $ipList = self::getIpList();
+        $ipList[] = [
+            'ip' => Tools::getClientIp(),
+            'time' => time()
+        ];
+
+        // save the list in cache
+        Cache::set('login-ip-list', $ipList);
+
+        // if the user is not empty, save the incident
+        if (empty($user)) {
+            return;
+        }
+
+        // add the current user to the list
+        $userList = self::getUserList();
+        $userList[] = [
+            'user' => $user,
+            'time' => time()
+        ];
+
+        // save the list in cache
+        Cache::set('login-user-list', $userList);
     }
 
     private function loginAction(Request $request): void
@@ -162,80 +256,6 @@ class Login implements ControllerInterface
         setcookie('fsNick', $user->nick, $expiration, Setup::get('route'));
         setcookie('fsLogkey', $user->logkey, $expiration, Setup::get('route'));
         setcookie('fsLang', $user->langcode, $expiration, Setup::get('route'));
-    }
-
-    private function userHasManyIncidents(string $username = ''): bool
-    {
-        // get ip list
-        $ipList = self::getIpList();
-
-        // get ip count on the list
-        $currentIp = Tools::getClientIp();
-        $ipCount = 0;
-        foreach ($ipList as $item) {
-            if ($item['ip'] === $currentIp) {
-                $ipCount++;
-            }
-        }
-        if ($ipCount > self::MAX_INCIDENT_COUNT) {
-            return true;
-        }
-
-        // get user list
-        $userList = self::getUserList();
-
-        // get user count on the list
-        $userCount = 0;
-        foreach ($userList as $item) {
-            if ($item['user'] === $username) {
-                $userCount++;
-            }
-        }
-        return $userCount > self::MAX_INCIDENT_COUNT;
-    }
-
-    private function getIpList(): array
-    {
-        $ipList = Cache::get(self::IP_LIST);
-        return is_array($ipList) ? $ipList : [];
-    }
-
-    private function getUserList(): array
-    {
-        $userList = Cache::get(self::USER_LIST);
-        return is_array($userList) ? $userList : [];
-    }
-
-    private function saveIncident(string $user = ''): void
-    {
-        // get the IP list from cache
-        $ipList = self::getIpList();
-
-        // add the current IP to the list
-        $ipList[] = [
-            'ip' => Tools::getClientIp(),
-            'time' => time()
-        ];
-
-        // save the list in cache
-        Cache::set('login-ip-list', $ipList);
-
-        // if the user is not empty, save the incident
-        if (empty($user)) {
-            return;
-        }
-
-        // get the user list from cache
-        $userList = self::getUserList();
-
-        // add the current user to the list
-        $userList[] = [
-            'user' => $user,
-            'time' => time()
-        ];
-
-        // save the list in cache
-        Cache::set('login-user-list', $userList);
     }
 
     private function logoutAction(Request $request): void

@@ -45,19 +45,14 @@ final class DatabaseUpdater
         return self::updateTable($tableName, $structure);
     }
 
-    public static function createTable(string $tableName, array $structure): bool
+    private static function getXmlTableLocation(string $tableName): string
     {
-        return self::bridge()->createTable($tableName, $structure);
-    }
+        $dynPath = Setup::get('folder') . '/Dynamic/Table/' . $tableName . '.xml';
+        if (file_exists($dynPath)) {
+            return $dynPath;
+        }
 
-    public static function dropTable(string $tableName): bool
-    {
-        return self::bridge()->dropTable($tableName);
-    }
-
-    public static function updateTable(string $tableName, array $structure): bool
-    {
-        return self::bridge()->updateTable($tableName, $structure);
+        return Setup::get('folder') . '/Src/Main/Table/' . $tableName . '.xml';
     }
 
     /**
@@ -92,24 +87,6 @@ final class DatabaseUpdater
         return $structure;
     }
 
-    private static function bridge(): DbUpdaterInterface
-    {
-        if (!isset(self::$bridge)) {
-            self::$bridge = new DatabaseUpdaterMysql();
-        }
-
-        return self::$bridge;
-    }
-
-    private static function checkColumnNull(string $type, $null): string
-    {
-        if ($type === 'serial') {
-            return 'NO';
-        }
-
-        return $null && strtolower($null) === 'no' ? 'NO' : 'YES';
-    }
-
     /**
      * @throws Exception
      */
@@ -125,13 +102,36 @@ final class DatabaseUpdater
         throw new Exception('invalid-db-column-type: ' . $type);
     }
 
-    private static function getXmlTableLocation(string $tableName): string
+    private static function checkColumnNull(string $type, $null): string
     {
-        $dynPath = Setup::get('folder') . '/Dynamic/Table/' . $tableName . '.xml';
-        if (file_exists($dynPath)) {
-            return $dynPath;
+        if ($type === 'serial') {
+            return 'NO';
         }
 
-        return Setup::get('folder') . '/Src/Main/Table/' . $tableName . '.xml';
+        return $null && strtolower($null) === 'no' ? 'NO' : 'YES';
+    }
+
+    public static function createTable(string $tableName, array $structure): bool
+    {
+        return self::bridge()->createTable($tableName, $structure);
+    }
+
+    private static function bridge(): DbUpdaterInterface
+    {
+        if (!isset(self::$bridge)) {
+            self::$bridge = new DatabaseUpdaterMysql();
+        }
+
+        return self::$bridge;
+    }
+
+    public static function updateTable(string $tableName, array $structure): bool
+    {
+        return self::bridge()->updateTable($tableName, $structure);
+    }
+
+    public static function dropTable(string $tableName): bool
+    {
+        return self::bridge()->dropTable($tableName);
     }
 }

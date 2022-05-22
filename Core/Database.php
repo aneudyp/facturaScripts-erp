@@ -22,7 +22,7 @@ namespace FacturaScripts\Core;
 use FacturaScripts\Core\Bridge\DatabaseMysql;
 use FacturaScripts\Core\Contract\DbInterface;
 
-class Database
+final class Database
 {
     public const CHANNEL = 'database';
     public const LIMIT = 50;
@@ -58,6 +58,29 @@ class Database
     /**
      * @throws KernelException
      */
+    private static function bridge(): DbInterface
+    {
+        if (isset(self::$bridge)) {
+            return self::$bridge;
+        }
+
+        if (empty(Setup::get('db_host'))) {
+            throw new KernelException('DatabaseError', 'no-db-setup');
+        }
+
+        self::$bridge = new DatabaseMysql(
+            Setup::get('db_host'),
+            Setup::get('db_user'),
+            Setup::get('db_pass'),
+            Setup::get('db_name'),
+            Setup::get('db_port')
+        );
+        return self::$bridge;
+    }
+
+    /**
+     * @throws KernelException
+     */
     public static function close(): bool
     {
         self::$inTransaction = false;
@@ -88,14 +111,6 @@ class Database
     /**
      * @throws KernelException
      */
-    public static function escapeString(string $str): string
-    {
-        return self::bridge()->escapeString($str);
-    }
-
-    /**
-     * @throws KernelException
-     */
     public static function exec(string $sql): bool
     {
         self::log()->debug($sql);
@@ -105,6 +120,15 @@ class Database
             self::bridge()->clearLastErrorMsg();
         }
         return $return;
+    }
+
+    private static function log(): Logger
+    {
+        if (!isset(self::$logger)) {
+            self::$logger = new Logger(self::CHANNEL);
+        }
+
+        return self::$logger;
     }
 
     /**
@@ -121,14 +145,6 @@ class Database
     public static function getConstraints(string $tableName): array
     {
         return self::bridge()->getConstraints($tableName);
-    }
-
-    /**
-     * @throws KernelException
-     */
-    public static function getTables(): array
-    {
-        return self::bridge()->getTables();
     }
 
     public static function inTransaction(): bool
@@ -196,6 +212,14 @@ class Database
     /**
      * @throws KernelException
      */
+    public static function getTables(): array
+    {
+        return self::bridge()->getTables();
+    }
+
+    /**
+     * @throws KernelException
+     */
     public static function var2str($val): string
     {
         if ($val === null) {
@@ -222,40 +246,16 @@ class Database
     /**
      * @throws KernelException
      */
-    public static function version(): string
+    public static function escapeString(string $str): string
     {
-        return self::bridge()->version();
+        return self::bridge()->escapeString($str);
     }
 
     /**
      * @throws KernelException
      */
-    private static function bridge(): DbInterface
+    public static function version(): string
     {
-        if (isset(self::$bridge)) {
-            return self::$bridge;
-        }
-
-        if(empty(Setup::get('db_host'))) {
-            throw new KernelException('DatabaseError', 'no-db-setup');
-        }
-
-        self::$bridge = new DatabaseMysql(
-            Setup::get('db_host'),
-            Setup::get('db_user'),
-            Setup::get('db_pass'),
-            Setup::get('db_name'),
-            Setup::get('db_port')
-        );
-        return self::$bridge;
-    }
-
-    private static function log(): Logger
-    {
-        if (!isset(self::$logger)) {
-            self::$logger = new Logger(self::CHANNEL);
-        }
-
-        return self::$logger;
+        return self::bridge()->version();
     }
 }

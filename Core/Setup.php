@@ -46,7 +46,8 @@ final class Setup
         define('FS_FOLDER', $folder);
 
         $fields = [
-            'cookies_expire', 'db_type', 'db_host', 'db_port', 'db_name', 'db_user', 'db_pass', 'lang', 'route', 'timezone'
+            'cookies_expire', 'db_type', 'db_host', 'db_port', 'db_name', 'db_user', 'db_pass', 'lang', 'route',
+            'seed', 'timezone'
         ];
 
         // load config.php if exists
@@ -72,6 +73,15 @@ final class Setup
         }
     }
 
+    public static function set(string $property, $value): void
+    {
+        // properties are case-insensitive
+        $name = strtolower($property);
+        if (false === array_key_exists($name, self::$data)) {
+            self::$data[$name] = $value;
+        }
+    }
+
     public static function read(string $group, string $property, $default = null)
     {
         if (!isset(self::$settings[$group][$property])) {
@@ -82,14 +92,5 @@ final class Setup
         }
 
         return self::$settings[$group][$property] ?? $default;
-    }
-
-    public static function set(string $property, $value): void
-    {
-        // properties are case-insensitive
-        $name = strtolower($property);
-        if (false === array_key_exists($name, self::$data)) {
-            self::$data[$name] = $value;
-        }
     }
 }
