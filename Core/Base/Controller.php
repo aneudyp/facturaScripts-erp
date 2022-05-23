@@ -267,10 +267,15 @@ class Controller
         ToolBox::i18nLog()->debug('login-ok', ['%nick%' => $user->nick]);
         ToolBox::log()::setContext('nick', $user->nick);
 
+        $menuManager = new MenuManager();
+        $menuManager->setUser($user);
+        $menuManager->selectPage($this->getPageData());
+
         $permissions = new ControllerPermissions($user, $this->getClassName());
         $this->privateCore($response, $user, $permissions);
         echo Html::render($this->template, [
             'fsc' => $this,
+            'menuManager' => $menuManager
         ]);
     }
 
