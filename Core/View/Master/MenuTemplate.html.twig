@@ -108,17 +108,15 @@
     {% endblock %}
     <div class="pt-3">
         {% block messages %}
-            {% from 'Macro/Utils.html.twig' import message as showMessage %}
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-12">
-                        {{ showMessage(log, ['error', 'critical'], 'danger') }}
-                        {{ showMessage(log, ['warning'], 'warning') }}
-                        {{ showMessage(log, ['notice'], 'success') }}
-                        {{ showMessage(log, ['info'], 'info') }}
-                    </div>
-                </div>
-            </div>
+            {% for item in logs %}
+                {% if item.level in ['critical','error'] %}
+                    <div class="alert alert-danger">{{ item.message }}</div>
+                {% elseif item.level == 'warning' %}
+                    <div class="alert alert-warning">{{ item.message }}</div>
+                {% else %}
+                    <div class="alert alert-info">{{ item.message }}</div>
+                {% endif %}
+            {% endfor %}
         {% endblock %}
         {% block bodyHeaderOptions %}
         {% endblock %}

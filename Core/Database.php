@@ -111,6 +111,14 @@ final class Database
     /**
      * @throws KernelException
      */
+    public static function escapeString(string $str): string
+    {
+        return self::bridge()->escapeString($str);
+    }
+
+    /**
+     * @throws KernelException
+     */
     public static function exec(string $sql): bool
     {
         self::log()->debug($sql);
@@ -120,15 +128,6 @@ final class Database
             self::bridge()->clearLastErrorMsg();
         }
         return $return;
-    }
-
-    private static function log(): Logger
-    {
-        if (!isset(self::$logger)) {
-            self::$logger = new Logger(self::CHANNEL);
-        }
-
-        return self::$logger;
     }
 
     /**
@@ -150,6 +149,14 @@ final class Database
     public static function inTransaction(): bool
     {
         return self::$inTransaction;
+    }
+
+    /**
+     * @throws KernelException
+     */
+    public static function getTables(): array
+    {
+        return self::bridge()->getTables();
     }
 
     /**
@@ -212,14 +219,6 @@ final class Database
     /**
      * @throws KernelException
      */
-    public static function getTables(): array
-    {
-        return self::bridge()->getTables();
-    }
-
-    /**
-     * @throws KernelException
-     */
     public static function var2str($val): string
     {
         if ($val === null) {
@@ -246,9 +245,9 @@ final class Database
     /**
      * @throws KernelException
      */
-    public static function escapeString(string $str): string
+    public static function updateSequence(string $tableName, string $fields): void
     {
-        return self::bridge()->escapeString($str);
+        self::bridge()->updateSequence($tableName, $fields);
     }
 
     /**
@@ -257,5 +256,14 @@ final class Database
     public static function version(): string
     {
         return self::bridge()->version();
+    }
+
+    private static function log(): Logger
+    {
+        if (!isset(self::$logger)) {
+            self::$logger = new Logger(self::CHANNEL);
+        }
+
+        return self::$logger;
     }
 }

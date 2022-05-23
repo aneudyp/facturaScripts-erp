@@ -30,6 +30,7 @@ if (version_compare(PHP_VERSION, '7.2') < 0) {
 // set up the autoloader and config
 require_once __DIR__ . '/vendor/autoload.php';
 Setup::load(__DIR__);
+Setup::loadCompatibility();
 
 // set up the error handler
 register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
