@@ -289,7 +289,7 @@ abstract class ModelClass extends ModelCore
         foreach ($fields as $key => $value) {
             if ($key == static::primaryColumn()) {
                 $this->{$key} = empty($this->{$key}) ? null : $this->{$key};
-            } elseif (null === $value['default'] && $value['is_nullable'] === 'NO' && $this->{$key} === null) {
+            } elseif (null === $value['default'] && $value['nullable'] === false && $this->{$key} === null) {
                 $this->toolBox()->i18nLog()->warning('field-can-not-be-null', ['%fieldName%' => $key, '%tableName%' => static::tableName()]);
                 $return = false;
             }

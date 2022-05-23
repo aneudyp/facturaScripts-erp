@@ -232,7 +232,7 @@ class DataBaseWhere
             switch ($this->operator) {
                 case 'LIKE':
                     $result .= $union . 'LOWER(' . $this->escapeColumn($field) . ') '
-                        . $this->dataBase->getOperator($this->operator) . ' ' . $this->getValueFromOperatorLike($value);
+                        . $this->getOperator($this->operator) . ' ' . $this->getValueFromOperatorLike($value);
                     break;
 
                 case 'XLIKE':
@@ -240,7 +240,7 @@ class DataBaseWhere
                     $union2 = '';
                     foreach (explode(' ', $value) as $query) {
                         $result .= $union2 . 'LOWER(' . $this->escapeColumn($field) . ') '
-                            . $this->dataBase->getOperator('LIKE') . ' ' . $this->getValueFromOperatorLike($query);
+                            . $this->getOperator('LIKE') . ' ' . $this->getValueFromOperatorLike($query);
                         $union2 = ' AND ';
                     }
                     $result .= ')';
@@ -248,7 +248,7 @@ class DataBaseWhere
 
                 default:
                     $result .= $union . $this->escapeColumn($field) . ' '
-                        . $this->dataBase->getOperator($this->operator) . ' ' . $this->getValue($value);
+                        . $this->getOperator($this->operator) . ' ' . $this->getValue($value);
                     break;
             }
         }
@@ -291,6 +291,15 @@ class DataBaseWhere
         }
 
         return '';
+    }
+
+    private function getOperator(string $operator): string
+    {
+        if (strtolower(FS_DB_TYPE) == 'postgresql' && $operator == 'REGEXP') {
+            return '~';
+        }
+
+        return $operator;
     }
 
     /**
