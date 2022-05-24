@@ -30,6 +30,34 @@ final class DatabaseUpdater
      */
     private static $bridge;
 
+    public static function checkAllTables(): bool
+    {
+        $tables = [
+            'logs', 'pages', 'roles', 'roles_access', 'attached_files', 'empresas', 'users', 'attached_files_rel',
+            'roles_users', 'pages_filters', 'pages_options', 'settings', 'agenciastrans', 'almacenes', 'api_keys',
+            'api_access', 'atributos', 'atributos_valores', 'balances', 'balancescuentas', 'balancescuentasabreviadas',
+            'conceptos_partidas', 'cronjobs', 'cuentasbanco', 'cuentasesp', 'diarios', 'divisas', 'doctransformations',
+            'ejercicios', 'cuentas', 'subcuentas', 'asientos', 'partidas', 'emails_notifications', 'emails_sent',
+            'estados_documentos', 'fabricantes', 'familias', 'formaspago', 'idsfiscales', 'impuestos', 'impuestoszonas',
+            'paises', 'provincias', 'ciudades', 'productos', 'variantes', 'stocks', 'reports', 'reportsamounts',
+            'reportsbalance', 'reportsledger', 'retenciones', 'series', 'secuencias_documentos', 'tarifas', 'agentes',
+            'gruposclientes', 'clientes', 'cuentasbcocli', 'proveedores', 'cuentasbcopro', 'contactos', 'albaranescli',
+            'pedidoscli', 'presupuestoscli', 'facturascli', 'lineasalbaranescli', 'lineasfacturascli',
+            'lineaspedidoscli', 'lineaspresupuestoscli', 'albaranesprov', 'pedidosprov', 'presupuestosprov',
+            'facturasprov', 'lineasalbaranesprov', 'lineasfacturasprov', 'lineaspedidosprov', 'lineaspresupuestosprov',
+            'recibospagoscli', 'pagoscli', 'recibospagosprov', 'pagosprov', 'regularizacionimpuestos'
+        ];
+
+        foreach ($tables as $table) {
+            if (false === self::checkTable($table)) {
+                echo "Fail on table $table.\n";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * @throws KernelException
      * @throws Exception

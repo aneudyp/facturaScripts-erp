@@ -19,6 +19,7 @@
 
 use FacturaScripts\Core\Base\ToolBox;
 use FacturaScripts\Core\Cache;
+use FacturaScripts\Core\DatabaseUpdater;
 use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
 
@@ -36,9 +37,6 @@ echo 'Edit "Test/bootstrap.php" if you want to use another config.php file.';
 echo "\n" . 'Using ' . $config . "\n";
 
 Setup::load(getcwd());
-Session::init();
-
-ToolBox::appSettings()->load();
 
 echo "\n" . 'Connection details:';
 echo "\n" . 'PHP: ' . phpversion();
@@ -46,6 +44,14 @@ echo "\n" . 'DB Host: ' . Setup::get('db_host');
 echo "\n" . 'DB User: ' . Setup::get('db_user');
 echo "\n" . 'DB Pass: ' . Setup::get('db_pass');
 echo "\n" . 'Database: ' . Setup::get('db_name') . "\n\n";
+
+// update the database
+if (false === DatabaseUpdater::checkAllTables()) {
+    die('Database not updated!');
+}
+
+Session::init();
+ToolBox::appSettings()->load();
 
 // clean cache
 Cache::clear();
