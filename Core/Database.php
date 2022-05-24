@@ -20,6 +20,7 @@
 namespace FacturaScripts\Core;
 
 use FacturaScripts\Core\Bridge\DatabaseMysql;
+use FacturaScripts\Core\Bridge\DatabasePostgres;
 use FacturaScripts\Core\Contract\DbInterface;
 
 final class Database
@@ -68,13 +69,30 @@ final class Database
             throw new KernelException('DatabaseError', 'no-db-setup');
         }
 
-        self::$bridge = new DatabaseMysql(
-            Setup::get('db_host'),
-            Setup::get('db_user'),
-            Setup::get('db_pass'),
-            Setup::get('db_name'),
-            Setup::get('db_port')
-        );
+        switch (Setup::get('db_type')) {
+            case 'mysql':
+                self::$bridge = new DatabaseMysql(
+                    Setup::get('db_host'),
+                    Setup::get('db_user'),
+                    Setup::get('db_pass'),
+                    Setup::get('db_name'),
+                    Setup::get('db_port')
+                );
+                break;
+
+            case 'postgresql':
+                self::$bridge = new DatabasePostgres(
+                    Setup::get('db_host'),
+                    Setup::get('db_user'),
+                    Setup::get('db_pass'),
+                    Setup::get('db_name'),
+                    Setup::get('db_port')
+                );
+                break;
+
+            default:
+                throw new KernelException('DatabaseError', 'no-db-type');
+        }
         return self::$bridge;
     }
 
