@@ -23,6 +23,8 @@ interface DbInterface
 {
     public function beginTransaction(): bool;
 
+    public function castColumn(string $name, string $type): string;
+
     public function clearLastErrorMsg(): void;
 
     public function close(): bool;
@@ -51,7 +53,7 @@ interface DbInterface
 
     public function select(string $sql, int $limit, int $offset): array;
 
-    public function updateSequence(string $tableName, string $fields): void;
+    public function updateSequence(string $tableName, array $fields): void;
 
     public function version(): string;
 }

@@ -53,6 +53,30 @@ final class DatabaseMysql implements DbInterface
         return $this->exec('START TRANSACTION;');
     }
 
+    public function castColumn(string $name, string $type): string
+    {
+        switch ($type) {
+            case 'int':
+            case 'integer':
+                return 'CAST(' . $name . ' AS UNSIGNED)';
+
+            case 'float':
+                return 'CAST(' . $name . ' AS DECIMAL(10,2))';
+
+            case 'string':
+                return 'CAST(' . $name . ' AS CHAR)';
+
+            case 'date':
+                return 'CAST(' . $name . ' AS DATE)';
+
+            case 'datetime':
+                return 'CAST(' . $name . ' AS DATETIME)';
+
+            default:
+                return $name;
+        }
+    }
+
     public function clearLastErrorMsg(): void
     {
         $this->lastErrorMsg = '';
@@ -182,7 +206,7 @@ final class DatabaseMysql implements DbInterface
         return $rows;
     }
 
-    public function updateSequence(string $tableName, string $fields): void
+    public function updateSequence(string $tableName, array $fields): void
     {
         // unnecessary on mysql
     }

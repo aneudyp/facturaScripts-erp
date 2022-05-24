@@ -59,41 +59,9 @@ final class Database
     /**
      * @throws KernelException
      */
-    private static function bridge(): DbInterface
+    public static function castColumn(string $name, string $type): string
     {
-        if (isset(self::$bridge)) {
-            return self::$bridge;
-        }
-
-        if (empty(Setup::get('db_host'))) {
-            throw new KernelException('DatabaseError', 'no-db-setup');
-        }
-
-        switch (Setup::get('db_type')) {
-            case 'mysql':
-                self::$bridge = new DatabaseMysql(
-                    Setup::get('db_host'),
-                    Setup::get('db_user'),
-                    Setup::get('db_pass'),
-                    Setup::get('db_name'),
-                    Setup::get('db_port')
-                );
-                break;
-
-            case 'postgresql':
-                self::$bridge = new DatabasePostgres(
-                    Setup::get('db_host'),
-                    Setup::get('db_user'),
-                    Setup::get('db_pass'),
-                    Setup::get('db_name'),
-                    Setup::get('db_port')
-                );
-                break;
-
-            default:
-                throw new KernelException('DatabaseError', 'no-db-type');
-        }
-        return self::$bridge;
+        return self::bridge()->castColumn($name, $type);
     }
 
     /**
@@ -263,7 +231,7 @@ final class Database
     /**
      * @throws KernelException
      */
-    public static function updateSequence(string $tableName, string $fields): void
+    public static function updateSequence(string $tableName, array $fields): void
     {
         self::bridge()->updateSequence($tableName, $fields);
     }
@@ -274,6 +242,46 @@ final class Database
     public static function version(): string
     {
         return self::bridge()->version();
+    }
+
+    /**
+     * @throws KernelException
+     */
+    private static function bridge(): DbInterface
+    {
+        if (isset(self::$bridge)) {
+            return self::$bridge;
+        }
+
+        if (empty(Setup::get('db_host'))) {
+            throw new KernelException('DatabaseError', 'no-db-setup');
+        }
+
+        switch (Setup::get('db_type')) {
+            case 'mysql':
+                self::$bridge = new DatabaseMysql(
+                    Setup::get('db_host'),
+                    Setup::get('db_user'),
+                    Setup::get('db_pass'),
+                    Setup::get('db_name'),
+                    Setup::get('db_port')
+                );
+                break;
+
+            case 'postgresql':
+                self::$bridge = new DatabasePostgres(
+                    Setup::get('db_host'),
+                    Setup::get('db_user'),
+                    Setup::get('db_pass'),
+                    Setup::get('db_name'),
+                    Setup::get('db_port')
+                );
+                break;
+
+            default:
+                throw new KernelException('DatabaseError', 'no-db-type');
+        }
+        return self::$bridge;
     }
 
     private static function log(): Logger

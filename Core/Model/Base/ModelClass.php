@@ -20,6 +20,7 @@
 namespace FacturaScripts\Core\Model\Base;
 
 use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
+use FacturaScripts\Core\Database;
 use FacturaScripts\Dinamic\Model\CodeModel;
 
 /**
@@ -212,7 +213,7 @@ abstract class ModelClass extends ModelCore
         if (false === in_array($modelFields[$field]['type'], ['integer', 'int', 'serial'])) {
             // Set Where to Integers values only
             $where[] = new DataBaseWhere($field, '^-?[0-9]+$', 'REGEXP');
-            $field = self::$dataBase->getEngine()->getSQL()->sql2Int($field);
+            $field = Database::castColumn($field, 'int');
         }
 
         // Search for new code value
@@ -359,7 +360,7 @@ abstract class ModelClass extends ModelCore
             if ($this->primaryColumnValue() === null) {
                 $this->{static::primaryColumn()} = self::$dataBase->lastval();
             } else {
-                self::$dataBase->updateSequence(static::tableName(), $this->getModelFields());
+                Database::updateSequence(static::tableName(), $this->getModelFields());
             }
 
             $this->pipe('saveInsert');

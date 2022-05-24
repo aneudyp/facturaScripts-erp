@@ -73,24 +73,6 @@ final class Setup
         }
     }
 
-    public static function loadCompatibility(): void
-    {
-        $constants = [
-            'FS_CODPAIS' => ['property' => 'codpais', 'default' => 'ESP'],
-            'FS_NF0' => ['property' => 'decimals', 'default' => 2],
-            'FS_NF1' => ['property' => 'decimal_separator', 'default' => ','],
-            'FS_NF2' => ['property' => 'thousands_separator', 'default' => ' '],
-            'FS_CURRENCY_POS' => ['property' => 'currency_position', 'default' => 'right'],
-            'FS_ITEM_LIMIT' => ['property' => 'item_limit', 'default' => 50],
-        ];
-
-        foreach ($constants as $key => $value) {
-            if (!defined($key)) {
-                define($key, self::read('default', $value['property'], $value['default']));
-            }
-        }
-    }
-
     public static function set(string $property, $value): void
     {
         // properties are case-insensitive

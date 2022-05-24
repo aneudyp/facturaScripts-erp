@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use FacturaScripts\Core\Base\ToolBox;
 use FacturaScripts\Core\Database;
 use FacturaScripts\Core\Kernel;
 use FacturaScripts\Core\Logger;
@@ -35,8 +36,9 @@ Setup::load(__DIR__);
 // set up the error handler
 register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
 
-Setup::loadCompatibility();
 Session::init();
+
+ToolBox::appSettings()->load();
 
 // gets the url to serve and runs the kernel
 $url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);

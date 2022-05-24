@@ -38,6 +38,33 @@ final class DatabasePostgres implements DbInterface
         return $this->exec('START TRANSACTION;');
     }
 
+    public function castColumn(string $name, string $type): string
+    {
+        switch ($type) {
+            case 'int':
+            case 'integer':
+                return "CAST($name AS INTEGER)";
+
+            case 'double':
+                return "CAST($name AS DOUBLE PRECISION)";
+
+            case 'string':
+                return "CAST($name AS TEXT)";
+
+            case 'boolean':
+                return "CAST($name AS BOOLEAN)";
+
+            case 'date':
+                return "CAST($name AS DATE)";
+
+            case 'datetime':
+                return "CAST($name AS TIMESTAMP)";
+
+            default:
+                return $name;
+        }
+    }
+
     public function clearLastErrorMsg(): void
     {
         $this->lastErrorMsg = '';
@@ -162,7 +189,7 @@ final class DatabasePostgres implements DbInterface
         return $rows;
     }
 
-    public function updateSequence(string $tableName, string $fields): void
+    public function updateSequence(string $tableName, array $fields): void
     {
         foreach ($fields as $colName => $field) {
             // serial type
