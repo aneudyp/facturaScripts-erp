@@ -20,8 +20,9 @@
 namespace FacturaScripts\Core\Bridge;
 
 use FacturaScripts\Core\Setup;
+use FacturasScripts\Core\Contract\LoggerStorageInterface;
 
-class LoggerFileStorage
+final class LoggerFileStorage implements LoggerStorageInterface
 {
     const LOG_FOLDER = '/MyFiles/Tmp/Logs';
 

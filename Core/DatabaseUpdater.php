@@ -47,12 +47,12 @@ final class DatabaseUpdater
 
     private static function getXmlTableLocation(string $tableName): string
     {
-        $dynPath = Setup::get('folder') . '/Dynamic/Table/' . $tableName . '.xml';
+        $dynPath = Setup::get('folder') . '/Dinamic/Table/' . $tableName . '.xml';
         if (file_exists($dynPath)) {
             return $dynPath;
         }
 
-        return Setup::get('folder') . '/Src/Main/Table/' . $tableName . '.xml';
+        return Setup::get('folder') . '/Core/Table/' . $tableName . '.xml';
     }
 
     /**
