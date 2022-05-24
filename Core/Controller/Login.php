@@ -21,9 +21,9 @@ namespace FacturaScripts\Core\Controller;
 
 use FacturaScripts\Core\Cache;
 use FacturaScripts\Core\Contract\ControllerInterface;
-use FacturaScripts\Core\FormToken;
 use FacturaScripts\Core\Html;
 use FacturaScripts\Core\Model\User;
+use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
 use FacturaScripts\Core\Tools;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,8 +37,6 @@ class Login implements ControllerInterface
 
     public function __construct(string $url)
     {
-        FormToken::addSeed($url);
-        FormToken::addSeed(Tools::getClientIp());
     }
 
     public function run(): void
@@ -115,12 +113,12 @@ class Login implements ControllerInterface
             return false;
         }
 
-        if (false === FormToken::validate($token)) {
+        if (false === Session::validate($token)) {
             Tools::i18nLog()->warning('form-token-invalid');
             return false;
         }
 
-        if (FormToken::tokenExist($token)) {
+        if (Session::tokenExist($token)) {
             Tools::i18nLog()->warning('form-token-expired');
             return false;
         }
@@ -131,7 +129,7 @@ class Login implements ControllerInterface
     private function userHasManyIncidents(string $username = ''): bool
     {
         // get ip count on the list
-        $currentIp = Tools::getClientIp();
+        $currentIp = Session::getClientIp();
         $ipCount = 0;
         foreach ($this->getIpList() as $item) {
             if ($item['ip'] === $currentIp) {
@@ -191,7 +189,7 @@ class Login implements ControllerInterface
         // add the current IP to the list
         $ipList = $this->getIpList();
         $ipList[] = [
-            'ip' => Tools::getClientIp(),
+            'ip' => Session::getClientIp(),
             'time' => time()
         ];
 
@@ -271,5 +269,7 @@ class Login implements ControllerInterface
         setcookie('fsNick', '', time() - 3600, Setup::get('route'));
         setcookie('fsLogkey', '', time() - 3600, Setup::get('route'));
         setcookie('fsLang', '', time() - 3600, Setup::get('route'));
+
+        Tools::i18nLog()->notice('logout-success');
     }
 }

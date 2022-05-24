@@ -19,24 +19,41 @@
 
 namespace FacturaScripts\Core;
 
-final class FormToken
+final class Session
 {
     const CACHE_KEY = 'CSRF_TOKENS';
     const MAX_TOKEN_AGE = 4;
     const MAX_TOKENS = 500;
     const RANDOM_STRING_LENGTH = 6;
 
+    private static $data = [];
     private static $seed = '';
 
-    public static function addSeed(string $seed): void
+    /**
+     * @param string $key
+     *
+     * @return mixed|null
+     */
+    public static function get(string $key)
     {
-        self::$seed .= $seed;
+        return self::$data[$key] ?? null;
+    }
+
+    public static function getClientIp(): string
+    {
+        foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'] as $field) {
+            if (isset($_SERVER[$field])) {
+                return (string)$_SERVER[$field];
+            }
+        }
+
+        return '::1';
     }
 
     public static function init(): void
     {
-        // something unique in each installation
-        self::$seed = Setup::get('seed', PHP_VERSION . __FILE__);
+        // something unique in each installation and session
+        self::$seed = Setup::get('seed', PHP_VERSION . __FILE__) . self::getClientIp();
     }
 
     public static function newToken(): string
@@ -47,6 +64,13 @@ final class FormToken
         // combine and generate the token
         $value = self::$seed . $num;
         return sha1($value) . '|' . self::getRandomStr();
+    }
+
+    public static function set(string $key, $value): void
+    {
+        if (false === array_key_exists($key, self::$data)) {
+            self::$data[$key] = $value;
+        }
     }
 
     public static function tokenExist(string $token): bool

@@ -20,6 +20,7 @@
 use FacturaScripts\Core\Database;
 use FacturaScripts\Core\Kernel;
 use FacturaScripts\Core\Logger;
+use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
 
 // checks the PHP version
@@ -30,10 +31,12 @@ if (version_compare(PHP_VERSION, '7.2') < 0) {
 // set up the autoloader and config
 require_once __DIR__ . '/vendor/autoload.php';
 Setup::load(__DIR__);
-Setup::loadCompatibility();
 
 // set up the error handler
 register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
+
+Setup::loadCompatibility();
+Session::init();
 
 // gets the url to serve and runs the kernel
 $url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);

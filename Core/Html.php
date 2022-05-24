@@ -71,7 +71,7 @@ final class Html
     private static function formTokenFunction(): TwigFunction
     {
         return new TwigFunction('formToken', function () {
-            return '<input type="hidden" name="_token" value="' . FormToken::newToken() . '"/>';
+            return '<input type="hidden" name="_token" value="' . Session::newToken() . '"/>';
         }, ['is_safe' => ['html']]);
     }
 
