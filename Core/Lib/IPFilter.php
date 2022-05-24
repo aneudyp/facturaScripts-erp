@@ -19,6 +19,8 @@
 
 namespace FacturaScripts\Core\Lib;
 
+use FacturaScripts\Core\Setup;
+
 /**
  * Prevents brute force attacks through a list of IP addresses and their counters failed attempts.
  *
@@ -56,7 +58,7 @@ class IPFilter
      */
     public function __construct()
     {
-        $this->filePath = FS_FOLDER . '/MyFiles/Cache/ip.list';
+        $this->filePath = Setup::get('folder') . '/MyFiles/Tmp/ip.list';
         $this->ipList = [];
         $this->readFile();
     }
