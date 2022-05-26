@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace FacturasScripts\Core\Contract;
+namespace FacturaScripts\Core\Contract;
 
 interface LoggerStorageInterface
 {

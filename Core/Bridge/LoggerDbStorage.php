@@ -19,10 +19,10 @@
 
 namespace FacturaScripts\Core\Bridge;
 
+use FacturaScripts\Core\Contract\LoggerStorageInterface;
 use FacturaScripts\Core\Logger;
 use FacturaScripts\Core\Session;
 use FacturaScripts\Dinamic\Model\LogMessage;
-use FacturasScripts\Core\Contract\LoggerStorageInterface;
 
 final class LoggerDbStorage implements LoggerStorageInterface
 {

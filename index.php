@@ -38,8 +38,6 @@ register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
 
 Session::init();
 
-ToolBox::appSettings()->load();
-
 // gets the url to serve and runs the kernel
 $url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 Kernel::run($url);
