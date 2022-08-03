@@ -56,7 +56,6 @@ final class Kernel
         $defaults = [
             '/' => '\\FacturaScripts\\Core\\Controller\\Dashboard',
             '/Core/*' => '\\FacturaScripts\\Core\\Controller\\Files',
-            '/Dashboard' => '\\FacturaScripts\\Core\\Controller\\Dashboard',
             '/Dinamic/*' => '\\FacturaScripts\\Core\\Controller\\Files',
             '/install' => '\\FacturaScripts\\Core\\Controller\\Installer',
             '/login' => '\\FacturaScripts\\Core\\Controller\\Login',
@@ -64,6 +63,15 @@ final class Kernel
             '/node_modules/*' => '\\FacturaScripts\\Core\\Controller\\Files',
             '/Plugins/*' => '\\FacturaScripts\\Core\\Controller\\Files'
         ];
+
+        // leemos los archivos php del directorio Dinamic/Controller
+        $files = scandir(Setup::get('folder') . '/Dinamic/Controller');
+        foreach ($files as $file) {
+            if (strpos($file, '.php') !== false) {
+                $className = '\\FacturaScripts\\Dinamic\\Controller\\' . str_replace('.php', '', $file);
+                $defaults['/' . str_replace('.php', '', $file)] = $className;
+            }
+        }
 
         return array_merge($defaults, self::$routes ?? []);
     }
