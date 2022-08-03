@@ -83,6 +83,8 @@ final class PluginDeploy
         $menuManager->init();
         $pageNames = [];
 
+        $exclude = ['Files', 'Installer', 'Login'];
+
         $files = ToolBox::files()::scanFolder(FS_FOLDER . DIRECTORY_SEPARATOR . 'Dinamic' . DIRECTORY_SEPARATOR . 'Controller', false);
         foreach ($files as $fileName) {
             if (substr($fileName, -4) !== '.php') {
@@ -91,6 +93,9 @@ final class PluginDeploy
 
             $controllerName = substr($fileName, 0, -4);
             $controllerNamespace = '\\FacturaScripts\\Dinamic\\Controller\\' . $controllerName;
+            if (in_array($controllerName, $exclude)) {
+                continue;
+            }
 
             if (!class_exists($controllerNamespace)) {
                 /// we force the loading of the file because at this point the autoloader will not find it

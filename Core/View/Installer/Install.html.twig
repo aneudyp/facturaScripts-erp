@@ -50,7 +50,7 @@
     <ul class="nav navbar-nav mr-auto"></ul>
     <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
         <li class="nav-item">
-            <a class="nav-link" href="?phpinfo=TRUE">
+            <a class="nav-link" href="install?action=phpinfo">
                 <i class="fas fa-info-circle fa-fw" aria-hidden="true"></i> phpinfo
             </a>
         </li>
@@ -98,7 +98,8 @@
                     </ul>
                 </div>
                 <div class="card-body">
-                    <form name="fs_install" method="post" class="form">
+                    <form action="install" name="fs_install" method="post" class="form">
+                        <input type="hidden" name="action" value="install"/>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="preferencias">
                                 <div class="row">

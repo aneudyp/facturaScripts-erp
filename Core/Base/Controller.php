@@ -119,6 +119,7 @@ class Controller implements ControllerInterface
     public function __construct(string $uri = '')
     {
         $this->dataBase = new DataBase();
+        $this->dataBase->connect();
 
         $appSettings = new AppSettings();
         $appSettings->load();
@@ -137,11 +138,6 @@ class Controller implements ControllerInterface
         AssetManager::setAssetsForPage($this->className);
 
         $this->checkPHPversion(7.2);
-    }
-
-    public function __destruct()
-    {
-        $this->dataBase->close();
     }
 
     /**
@@ -278,7 +274,7 @@ class Controller implements ControllerInterface
             throw new KernelException('LoginToContinue', 'login-user-not-found');
         }
 
-        if (false === $user->verifyLogkey($this->request->cookies->get('fsLogkey'))) {
+        if (false === $user->verifyLogkey($this->request->cookies->get('fsLogkey', ''))) {
             ToolBox::i18nLog()->warning('login-cookie-fail');
             // clear fsNick cookie
             setcookie('fsNick', '', time() - FS_COOKIES_EXPIRE, '/');

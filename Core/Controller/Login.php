@@ -249,6 +249,9 @@ class Login implements ControllerInterface
             return;
         }
 
+        $user->newLogkey(Session::getClientIp());
+        $user->save();
+
         // save cookies
         $expiration = time() + (int)Setup::get('cookies_expire');
         setcookie('fsNick', $user->nick, $expiration, Setup::get('route'));

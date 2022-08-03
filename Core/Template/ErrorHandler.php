@@ -58,7 +58,7 @@ abstract class ErrorHandler implements ErrorHandlerInterface
             return;
         }
 
-        echo '<h1>Fatal error!!!</h1>'
+        echo '<h1>Fatal Error ' . $error['type'] . '</h1>'
             . '<p>' . $error['file'] . ':' . $error['line'] . '</p>'
             . nl2br($error['message']);
     }

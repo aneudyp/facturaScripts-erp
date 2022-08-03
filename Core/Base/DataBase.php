@@ -22,6 +22,8 @@ namespace FacturaScripts\Core\Base;
 use FacturaScripts\Core\Base\DataBase\DataBaseEngine;
 use FacturaScripts\Core\Base\DataBase\MysqlEngine;
 use FacturaScripts\Core\Base\DataBase\PostgresqlEngine;
+use FacturaScripts\Core\KernelException;
+use FacturaScripts\Core\Setup;
 
 /**
  * Generic class of access to the database, either MySQL or PostgreSQL.
@@ -70,14 +72,17 @@ final class DataBase
         if (self::$link === null) {
             self::$miniLog = new MiniLog(self::CHANNEL);
 
-            switch (strtolower(FS_DB_TYPE)) {
+            switch (Setup::get('db_type')) {
+                case 'mysql':
+                    self::$engine = new MysqlEngine();
+                    break;
+
                 case 'postgresql':
                     self::$engine = new PostgresqlEngine();
                     break;
 
                 default:
-                    self::$engine = new MysqlEngine();
-                    break;
+                    throw new KernelException('DatabaseError', 'no-db-type');
             }
         }
     }
@@ -468,7 +473,8 @@ final class DataBase
      *
      * @return string
      */
-    public function version()
+    public
+    function version()
     {
         return $this->connected() ? self::$engine->version(self::$link) : '';
     }

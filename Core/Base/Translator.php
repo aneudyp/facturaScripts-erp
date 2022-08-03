@@ -19,6 +19,7 @@
 
 namespace FacturaScripts\Core\Base;
 
+use FacturaScripts\Core\Setup;
 use Symfony\Component\Translation\Loader\JsonFileLoader;
 use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
@@ -153,7 +154,7 @@ class Translator
      */
     private function getDefaultLang(): string
     {
-        return self::$defaultLang ?? FS_LANG;
+        return self::$defaultLang ?? Setup::get('lang', self::FALLBACK_LANG);
     }
 
     /**
