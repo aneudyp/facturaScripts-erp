@@ -69,7 +69,7 @@ final class Translator
     public function setLang(string $langcode): void
     {
         $this->lang = empty($langcode) ?
-            Setup::get('langcode', self::DEFAULT_LANG) :
+            Setup::get('lang', self::DEFAULT_LANG) :
             $langcode;
     }
 

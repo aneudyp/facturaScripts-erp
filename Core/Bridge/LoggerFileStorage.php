@@ -20,7 +20,7 @@
 namespace FacturaScripts\Core\Bridge;
 
 use FacturaScripts\Core\Setup;
-use FacturasScripts\Core\Contract\LoggerStorageInterface;
+use FacturaScripts\Core\Contract\LoggerStorageInterface;
 
 final class LoggerFileStorage implements LoggerStorageInterface
 {

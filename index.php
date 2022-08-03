@@ -17,10 +17,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use FacturaScripts\Core\Base\ToolBox;
 use FacturaScripts\Core\Database;
 use FacturaScripts\Core\Kernel;
 use FacturaScripts\Core\Logger;
+use FacturaScripts\Core\Plugins;
 use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
 
@@ -31,11 +31,12 @@ if (version_compare(PHP_VERSION, '7.2') < 0) {
 
 // set up the autoloader and config
 require_once __DIR__ . '/vendor/autoload.php';
-Setup::load(__DIR__);
 
 // set up the error handler
 register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
 
+Setup::load(__DIR__);
+Plugins::init();
 Session::init();
 
 // gets the url to serve and runs the kernel

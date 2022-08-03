@@ -20,7 +20,8 @@
 namespace FacturaScripts\Core;
 
 use FacturaScripts\Core\Bridge\LoggerDbStorage;
-use FacturasScripts\Core\Contract\LoggerStorageInterface;
+use FacturaScripts\Core\Bridge\LoggerFileStorage;
+use FacturaScripts\Core\Contract\LoggerStorageInterface;
 
 final class Logger
 {
@@ -159,7 +160,7 @@ final class Logger
     public static function save(string $channel = ''): bool
     {
         if (!isset(self::$storage)) {
-            self::$storage = new LoggerDbStorage();
+            self::$storage = Database::connected() ? new LoggerDbStorage() : new LoggerFileStorage();
         }
 
         $data = empty($channel) ? self::$data : self::read($channel);

@@ -19,27 +19,15 @@
 
 namespace FacturaScripts\Core;
 
-use FacturaScripts\Core\Base\FileManager;
-
-final class Tools
+final class Plugins
 {
-    public static function files(): FileManager
+    const CORE_VERSION = 2023;
+
+    public static function deploy(): void
     {
-        return new FileManager();
     }
 
-    public static function i18nLog(string $channel = ''): Logger
+    public static function init(): void
     {
-        return new Logger($channel, true);
-    }
-
-    public static function log(string $channel = ''): Logger
-    {
-        return new Logger($channel);
-    }
-
-    public static function randomString(int $length = 10): string
-    {
-        return mb_substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
     }
 }

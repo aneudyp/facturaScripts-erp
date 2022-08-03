@@ -86,6 +86,11 @@ final class Database
         return false;
     }
 
+    public static function connected(): bool
+    {
+        return isset(self::$bridge);
+    }
+
     /**
      * @throws KernelException
      */
