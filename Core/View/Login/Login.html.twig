@@ -5,9 +5,10 @@
     <div class="container">
         <div class="row justify-content-md-center">
             <div class="col-md-6">
-                <form action="{{ asset('') }}" method="post" class="form">
+                <form action="{{ asset('login') }}" method="post" class="form">
+                    {{ formToken() }}
                     <div class="card mt-4">
-                        <a href="{{ asset('') }}">
+                        <a href="{{ asset('login') }}">
                             {% set idfile = appSettings.get('default','idloginimage', 0) %}
                             {{ _self.loadLogo(idfile) }}
                         </a>
@@ -40,7 +41,7 @@
                                     {{ i18n.trans('i-forgot-password') }}
                                 </a>
                             </div>
-                            <button type="submit" class="btn btn-block btn-primary mb-4">
+                            <button type="submit" name="action" value="login" class="btn btn-block btn-primary mb-4">
                                 {{ i18n.trans('login') }}
                             </button>
                         </div>
@@ -67,7 +68,8 @@
             </div>
         </div>
     </div>
-    <form action="{{ asset('') }}" method="post" class="form">
+    <form action="{{ asset('login') }}" method="post" class="form">
+        {{ formToken() }}
         <div class="modal fade" id="newPasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -91,7 +93,7 @@
                                         <i class="fas fa-user fa-fw" aria-hidden="true"></i>
                                     </span>
                                 </span>
-                                <input type="text" name="fsNewUserPasswd" class="form-control" maxlength="50"
+                                <input type="text" name="fsNick" class="form-control" maxlength="50"
                                        placeholder="{{ i18n.trans('user') }}" required="" autocomplete="off"/>
                             </div>
                         </div>
@@ -132,7 +134,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">{{ i18n.trans('save') }}</button>
+                        <button type="submit" name="action" value="change-password" class="btn btn-primary">
+                            {{ i18n.trans('save') }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -150,7 +154,7 @@
 {% endblock %}
 
 {% macro loadLogo(idfile) %}
-    {% set url = 'Dinamic/Assets/Images/horizontal-logo.png' %}
+    {% set url = 'Core/Assets/Images/horizontal-logo.png' %}
     {% if idfile > 0 %}
         {% set attached = attachedFile(idfile) %}
         {% if attached.filename is not empty %}

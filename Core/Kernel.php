@@ -56,6 +56,7 @@ final class Kernel
         $defaults = [
             '/' => '\\FacturaScripts\\Core\\Controller\\Dashboard',
             '/Core/*' => '\\FacturaScripts\\Core\\Controller\\Files',
+            '/Dashboard' => '\\FacturaScripts\\Core\\Controller\\Dashboard',
             '/Dinamic/*' => '\\FacturaScripts\\Core\\Controller\\Files',
             '/install' => '\\FacturaScripts\\Core\\Controller\\Installer',
             '/login' => '\\FacturaScripts\\Core\\Controller\\Login',
