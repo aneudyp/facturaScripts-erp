@@ -19,7 +19,6 @@
 
 namespace FacturaScripts\Core\Controller;
 
-use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Base\ToolBox;
 use FacturaScripts\Core\Cache;
 use FacturaScripts\Core\Contract\ControllerInterface;
@@ -36,17 +35,8 @@ class Login implements ControllerInterface
     const MAX_INCIDENT_COUNT = 5;
     const USER_LIST = 'login-user-list';
 
-    private $db;
-
     public function __construct(string $url)
     {
-        $this->db = new DataBase();
-        $this->db->connect();
-    }
-
-    public function __destruct()
-    {
-        $this->db->close();
     }
 
     public function run(): void

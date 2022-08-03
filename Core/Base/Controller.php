@@ -119,7 +119,6 @@ class Controller implements ControllerInterface
     public function __construct(string $uri = '')
     {
         $this->dataBase = new DataBase();
-        $this->dataBase->connect();
 
         $appSettings = new AppSettings();
         $appSettings->load();
