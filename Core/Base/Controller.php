@@ -296,10 +296,15 @@ class Controller implements ControllerInterface
 
         $permissions = new ControllerPermissions($user, $this->getClassName());
         $this->privateCore($response, $user, $permissions);
-        echo Html::render($this->template, [
-            'fsc' => $this,
-            'menuManager' => $menuManager
-        ]);
+        if ($this->template) {
+            $response->setContent(
+                Html::render($this->template, [
+                    'fsc' => $this,
+                    'menuManager' => $menuManager
+                ])
+            );
+        }
+        $response->send();
     }
 
     /**
