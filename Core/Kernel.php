@@ -30,6 +30,15 @@ final class Kernel
 
     private static $routes;
 
+    public static function addRoute(string $route, string $controller): void
+    {
+        if (self::$routes === null) {
+            self::$routes = [];
+        }
+
+        self::$routes[$route] = $controller;
+    }
+
     public static function errorHandler(): void
     {
         $error = error_get_last();
@@ -42,12 +51,27 @@ final class Kernel
         }
     }
 
+    public static function getRoutes(): array
+    {
+        $defaults = [
+            '/' => '\\FacturaScripts\\Core\\Controller\\Dashboard',
+            '/Core/*' => '\\FacturaScripts\\Core\\Controller\\Files',
+            '/Dinamic/*' => '\\FacturaScripts\\Core\\Controller\\Files',
+            '/install' => '\\FacturaScripts\\Core\\Controller\\Installer',
+            '/login' => '\\FacturaScripts\\Core\\Controller\\Login',
+            '/MyFiles/*' => '\\FacturaScripts\\Core\\Controller\\Myfiles',
+            '/node_modules/*' => '\\FacturaScripts\\Core\\Controller\\Files',
+            '/Plugins/*' => '\\FacturaScripts\\Core\\Controller\\Files'
+        ];
+
+        return array_merge($defaults, self::$routes ?? []);
+    }
+
     public static function run(string $url): void
     {
         $relativeUrl = substr($url, strlen(Setup::get('route')));
 
         try {
-            self::loadRoutes();
             self::runController($relativeUrl);
         } catch (KernelException $exception) {
             error_clear_last();
@@ -70,28 +94,13 @@ final class Kernel
         return new FatalError($url);
     }
 
-    private static function loadRoutes(): void
-    {
-        self::$routes = [
-            '/' => '\\FacturaScripts\\Core\\Controller\\Dashboard',
-            '/Core/*' => '\\FacturaScripts\\Core\\Controller\\Files',
-            '/deploy' => '\\FacturaScripts\\Core\\Controller\\Deploy',
-            '/Dinamic/*' => '\\FacturaScripts\\Core\\Controller\\Files',
-            '/install' => '\\FacturaScripts\\Core\\Controller\\Installer',
-            '/login' => '\\FacturaScripts\\Core\\Controller\\Login',
-            '/MyFiles/*' => '\\FacturaScripts\\Core\\Controller\\Myfiles',
-            '/node_modules/*' => '\\FacturaScripts\\Core\\Controller\\Files',
-            '/Plugins/*' => '\\FacturaScripts\\Core\\Controller\\Files'
-        ];
-    }
-
     /**
      * @param string $url
      * @throws KernelException
      */
     private static function runController(string $url): void
     {
-        foreach (self::$routes as $route => $controller) {
+        foreach (self::getRoutes() as $route => $controller) {
             if ($url === $route) {
                 $app = new $controller($url);
                 if ($app instanceof ControllerInterface) {
