@@ -17,22 +17,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// checks the PHP version
-use FacturaScripts\Core\Kernel;
-use FacturaScripts\Core\Setup;
+namespace FacturaScripts\Core;
 
-if (version_compare(PHP_VERSION, '7.2') < 0) {
-    die('You need PHP 7.2 or later<br/>You have PHP ' . phpversion());
+use Exception;
+use FacturaScripts\Core\Contract\ErrorHandlerInterface;
+use Throwable;
+
+class KernelException extends Exception
+{
+    private $handler;
+
+    public function __construct($handler, $message, $code = 0, Throwable $previous = null)
+    {
+        $this->handler = $handler;
+        parent::__construct($message, $code, $previous);
+    }
+
+    public function getHandler(string $url): ErrorHandlerInterface
+    {
+        $dynClass = '\\FacturaScripts\\Dinamic\\ErrorHandler\\' . $this->handler;
+        if (class_exists($dynClass)) {
+            return new $dynClass($url);
+        }
+
+        $mainClass = '\\FacturaScripts\\Core\\ErrorHandler\\' . $this->handler;
+        return new $mainClass($url);
+    }
 }
-
-// set up the autoloader and config
-require_once __DIR__ . '/vendor/autoload.php';
-
-// set up the error handler
-register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
-
-Setup::load(__DIR__);
-
-// gets the url to serve and runs the kernel
-$url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-Kernel::run($url);

@@ -19,7 +19,11 @@
 
 namespace FacturaScripts\Core\Base;
 
+use FacturaScripts\Core\App\AppSettings;
+use FacturaScripts\Core\Contract\ControllerInterface;
 use FacturaScripts\Core\DataSrc\Empresas;
+use FacturaScripts\Core\Html;
+use FacturaScripts\Core\KernelException;
 use FacturaScripts\Dinamic\Lib\AssetManager;
 use FacturaScripts\Dinamic\Lib\MultiRequestProtection;
 use FacturaScripts\Dinamic\Model\Empresa;
@@ -33,7 +37,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @author Carlos García Gómez <carlos@facturascripts.com>
  */
-class Controller
+class Controller implements ControllerInterface
 {
 
     /**
@@ -112,16 +116,15 @@ class Controller
      */
     public $user = false;
 
-    /**
-     * Initialize all objects and properties.
-     *
-     * @param string $className
-     * @param string $uri
-     */
-    public function __construct(string $className, string $uri = '')
+    public function __construct(string $uri = '')
     {
-        $this->className = $className;
         $this->dataBase = new DataBase();
+        $this->dataBase->connect();
+
+        $appSettings = new AppSettings();
+        $appSettings->load();
+
+        $this->className = substr(strrchr(static::class, "\\"), 1);
         $this->empresa = new Empresa();
         $this->multiRequestProtection = new MultiRequestProtection();
         $this->request = Request::createFromGlobals();
@@ -132,9 +135,14 @@ class Controller
         $this->title = empty($pageData) ? $this->className : $this->toolBox()->i18n()->trans($pageData['title']);
 
         AssetManager::clear();
-        AssetManager::setAssetsForPage($className);
+        AssetManager::setAssetsForPage($this->className);
 
         $this->checkPHPversion(7.2);
+    }
+
+    public function __destruct()
+    {
+        $this->dataBase->close();
     }
 
     /**
@@ -258,6 +266,43 @@ class Controller
         }
     }
 
+    public function run(): void
+    {
+        $cookieNick = $this->request->cookies->get('fsNick', '');
+        if ($cookieNick === '') {
+            throw new KernelException('LoginToContinue', 'login-to-continue');
+        }
+
+        $user = new User();
+        if (false === $user->loadFromCode($cookieNick) && $user->enabled) {
+            ToolBox::i18nLog()->warning('login-user-not-found', ['%nick%' => $cookieNick]);
+            throw new KernelException('LoginToContinue', 'login-user-not-found');
+        }
+
+        if (false === $user->verifyLogkey($this->request->cookies->get('fsLogkey'))) {
+            ToolBox::i18nLog()->warning('login-cookie-fail');
+            // clear fsNick cookie
+            setcookie('fsNick', '', time() - FS_COOKIES_EXPIRE, '/');
+            throw new KernelException('LoginToContinue', 'login-cookie-fail');
+        }
+
+        $response = new Response();
+        $this->updateCookies($user, $response);
+        ToolBox::i18nLog()->debug('login-ok', ['%nick%' => $user->nick]);
+        ToolBox::log()::setContext('nick', $user->nick);
+
+        $menuManager = new MenuManager();
+        $menuManager->setUser($user);
+        $menuManager->selectPage($this->getPageData());
+
+        $permissions = new ControllerPermissions($user, $this->getClassName());
+        $this->privateCore($response, $user, $permissions);
+        echo Html::render($this->template, [
+            'fsc' => $this,
+            'menuManager' => $menuManager
+        ]);
+    }
+
     /**
      * Set the template to use for this controller.
      *
@@ -308,6 +353,21 @@ class Controller
     protected function getClassName(): string
     {
         return $this->className;
+    }
+
+    private function updateCookies(User &$user, Response &$response)
+    {
+        if (time() - strtotime($user->lastactivity) > 3600) {
+            $ipAddress = ToolBox::ipFilter()->getClientIp();
+            $user->updateActivity($ipAddress);
+            $user->save();
+
+            $expire = time() + FS_COOKIES_EXPIRE;
+            $response->headers->setCookie(new Cookie('fsNick', $user->nick, $expire, FS_ROUTE));
+            $response->headers->setCookie(new Cookie('fsLogkey', $user->logkey, $expire, FS_ROUTE));
+            $response->headers->setCookie(new Cookie('fsLang', $user->langcode, $expire, FS_ROUTE));
+            $response->headers->setCookie(new Cookie('fsCompany', $user->idempresa, $expire, FS_ROUTE));
+        }
     }
 
     /**
