@@ -77,6 +77,14 @@ final class Html
         }, ['is_safe' => ['html']]);
     }
 
+    private static function transFunction(): TwigFunction
+    {
+        return new TwigFunction('trans', function ($text) {
+            $i18n = new Translator();
+            return $i18n->trans($text);
+        });
+    }
+
     private static function twig(): Environment
     {
         if (!isset(self::$twig)) {
@@ -87,6 +95,7 @@ final class Html
             self::$twig->addFunction(self::assetFunction());
             self::$twig->addFunction(self::attachedFileFunction());
             self::$twig->addFunction(self::formTokenFunction());
+            self::$twig->addFunction(self::transFunction());
         }
 
         return self::$twig;
