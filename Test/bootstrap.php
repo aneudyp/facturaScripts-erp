@@ -17,14 +17,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-define("FS_FOLDER", getcwd());
+use FacturaScripts\Core\Base\PluginManager;
+use FacturaScripts\Core\Base\ToolBox;
+use FacturaScripts\Core\Cache;
+use FacturaScripts\Core\Session;
+use FacturaScripts\Core\Setup;
 
+// set up the autoloader and config
 require_once __DIR__ . '/../vendor/autoload.php';
-
-$config = FS_FOLDER . '/config.php';
+$config = __DIR__ . '/../config.php';
 if (__DIR__ === '/home/scrutinizer/build/Test') {
     echo 'Executing on scrutinizer ...' . "\n\n";
-    $config = FS_FOLDER . '/Test/config-scrutinizer.php';
+    $config = __DIR__ . '/config-scrutinizer.php';
 } elseif (!file_exists($config)) {
     die($config . " not found!\n");
 }
@@ -32,19 +36,21 @@ if (__DIR__ === '/home/scrutinizer/build/Test') {
 echo 'Edit "Test/bootstrap.php" if you want to use another config.php file.';
 echo "\n" . 'Using ' . $config . "\n";
 
-require_once $config;
+Setup::load(getcwd());
 
 echo "\n" . 'Connection details:';
 echo "\n" . 'PHP: ' . phpversion();
-echo "\n" . 'DB Host: ' . FS_DB_HOST;
-echo "\n" . 'DB User: ' . FS_DB_USER;
-echo "\n" . 'DB Pass: ' . FS_DB_PASS;
-echo "\n" . 'Database: ' . FS_DB_NAME . "\n\n";
+echo "\n" . 'DB Host: ' . Setup::get('db_host');
+echo "\n" . 'DB User: ' . Setup::get('db_user');
+echo "\n" . 'DB Pass: ' . Setup::get('db_pass');
+echo "\n" . 'Database: ' . Setup::get('db_name') . "\n\n";
+
+Session::init();
+ToolBox::appSettings()->load();
 
 // clean cache
-$cache = new FacturaScripts\Core\Base\Cache();
-$cache->clear();
+Cache::clear();
 
 // deploy
-$pluginManager = new FacturaScripts\Core\Base\PluginManager();
+$pluginManager = new PluginManager();
 $pluginManager->deploy();
