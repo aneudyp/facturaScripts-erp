@@ -46,8 +46,8 @@ final class Setup
         define('FS_FOLDER', $folder);
 
         $fields = [
-            'cookies_expire', 'db_type', 'db_host', 'db_port', 'db_name', 'db_user', 'db_pass', 'lang', 'route',
-            'seed', 'timezone'
+            'api_key', 'cookies_expire', 'db_type', 'db_host', 'db_port', 'db_name', 'db_user', 'db_pass',
+            'lang', 'route', 'seed', 'timezone'
         ];
 
         // load config.php if exists

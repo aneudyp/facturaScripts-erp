@@ -23,6 +23,7 @@ use FacturaScripts\Core\App\AppSettings;
 use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 use FacturaScripts\Core\Contract\ControllerInterface;
+use FacturaScripts\Core\Setup;
 use FacturaScripts\Dinamic\Model\ApiAccess;
 use FacturaScripts\Dinamic\Model\ApiKey;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,8 +101,8 @@ class ApiV3 implements ControllerInterface
             return false;
         }
 
-        if (defined('FS_API_KEY') && $token == FS_API_KEY) {
-            $this->apiKey->apikey = FS_API_KEY;
+        if (Setup::get('api_key') && $token == Setup::get('api_key')) {
+            $this->apiKey->apikey = Setup::get('api_key');
             $this->apiKey->fullaccess = true;
             return true;
         }
