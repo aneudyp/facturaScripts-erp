@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Kernel;
 use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
@@ -45,3 +46,7 @@ header('Strict-Transport-Security: max-age=31536000');
 // gets the url to serve and runs the kernel
 $url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 Kernel::run($url);
+
+// disconnect from the database
+$db = new DataBase();
+$db->close();

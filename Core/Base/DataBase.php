@@ -153,7 +153,7 @@ final class DataBase
         $error = '';
         self::$link = self::$engine->connect($error);
         if ($error !== '') {
-            self::$miniLog->critical($error);
+            throw new KernelException('DatabaseError', $error);
         }
 
         return $this->connected();
@@ -473,8 +473,7 @@ final class DataBase
      *
      * @return string
      */
-    public
-    function version()
+    public function version()
     {
         return $this->connected() ? self::$engine->version(self::$link) : '';
     }

@@ -51,7 +51,7 @@ final class Cache
     public static function get(string $key): mixed
     {
         $fileName = self::filename($key);
-        if (file_exists($fileName)) {
+        if (file_exists($fileName) && filemtime($fileName) < time() - self::EXPIRATION) {
             $data = file_get_contents($fileName);
             return unserialize($data);
         }

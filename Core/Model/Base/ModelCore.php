@@ -22,7 +22,6 @@ namespace FacturaScripts\Core\Model\Base;
 use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Base\DataBase\DataBaseTools;
 use FacturaScripts\Core\Base\ToolBox;
-use FacturaScripts\Core\KernelException;
 use FacturaScripts\Core\Lib\Import\CSVImport;
 
 /**
@@ -132,9 +131,7 @@ abstract class ModelCore
     {
         if (self::$dataBase === null) {
             self::$dataBase = new DataBase();
-            if (false === self::$dataBase->connect()) {
-                throw new KernelException('DatabaseError', 'Error connecting to the database');
-            }
+            self::$dataBase->connect();
 
             $tables = $this->toolBox()->cache()->get('fs_checked_tables');
             if (is_array($tables) && !empty($tables)) {

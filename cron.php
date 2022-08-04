@@ -17,6 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use FacturaScripts\Core\Base\DataBase;
+use FacturaScripts\Core\Cache;
 use FacturaScripts\Core\Controller\Cron;
 use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
@@ -43,3 +45,10 @@ Session::init();
 // run the cron controller
 $cron = new Cron('');
 $cron->run();
+
+// disconnect from the database
+$db = new DataBase();
+$db->close();
+
+// remove old data from the cache
+Cache::expire();
