@@ -25,18 +25,11 @@ use FacturaScripts\Core\Setup;
 
 // set up the autoloader and config
 require_once __DIR__ . '/../vendor/autoload.php';
-$config = __DIR__ . '/../config.php';
 if (__DIR__ === '/home/scrutinizer/build/Test') {
-    echo 'Executing on scrutinizer ...' . "\n\n";
-    $config = __DIR__ . '/config-scrutinizer.php';
-} elseif (!file_exists($config)) {
-    die($config . " not found!\n");
+    Setup::load(getcwd(), '/Test/config-scrutinizer.php');
+} else {
+    Setup::load(getcwd());
 }
-
-echo 'Edit "Test/bootstrap.php" if you want to use another config.php file.';
-echo "\n" . 'Using ' . $config . "\n";
-
-Setup::load(getcwd());
 
 echo "\n" . 'Connection details:';
 echo "\n" . 'PHP: ' . phpversion();

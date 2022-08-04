@@ -40,7 +40,7 @@ final class Setup
         return self::$data[$name] ?? $default;
     }
 
-    public static function load(string $folder): void
+    public static function load(string $folder, string $configFile = '/config.php'): void
     {
         self::set('folder', $folder);
         define('FS_FOLDER', $folder);
@@ -51,8 +51,8 @@ final class Setup
         ];
 
         // load config.php if exists
-        if (file_exists($folder . '/config.php')) {
-            require_once $folder . '/config.php';
+        if (file_exists($folder . $configFile)) {
+            require_once $folder . $configFile;
             foreach ($fields as $field) {
                 $constant = 'FS_' . strtoupper($field);
                 if (defined($constant)) {
