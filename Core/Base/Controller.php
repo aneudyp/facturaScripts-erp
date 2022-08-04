@@ -91,7 +91,7 @@ class Controller implements ControllerInterface
     /**
      * Name of the file for the template.
      *
-     * @var string|false nombre_archivo.html.twig
+     * @var string nombre_archivo.html.twig
      */
     private $template;
 
@@ -168,9 +168,9 @@ class Controller implements ControllerInterface
     /**
      * Return the template to use for this controller.
      *
-     * @return string|false
+     * @return string
      */
-    public function getTemplate()
+    public function getTemplate(): string
     {
         return $this->template;
     }
@@ -290,6 +290,14 @@ class Controller implements ControllerInterface
         $menuManager->selectPage($this->getPageData());
 
         $permissions = new ControllerPermissions($user, $this->getClassName());
+        if (false === $permissions->allowAccess) {
+            echo Html::render('Error/AccessDenied.html.twig', [
+                'fsc' => $this,
+                'menuManager' => $menuManager
+            ]);
+            return;
+        }
+
         $this->privateCore($response, $user, $permissions);
         if ($this->template) {
             $response->setContent(
@@ -311,7 +319,7 @@ class Controller implements ControllerInterface
      */
     public function setTemplate($template): bool
     {
-        $this->template = ($template === false) ? false : $template . '.html.twig';
+        $this->template = $template ? $template . '.html.twig' : '';
         return true;
     }
 
