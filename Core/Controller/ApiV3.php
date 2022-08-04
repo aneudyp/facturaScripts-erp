@@ -46,9 +46,6 @@ class ApiV3 implements ControllerInterface
         $this->url = $url;
         $this->request = Request::createFromGlobals();
 
-        $dataBase = new DataBase();
-        $dataBase->connect();
-
         $appSettings = new AppSettings();
         $appSettings->load();
     }

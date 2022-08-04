@@ -20,6 +20,7 @@
 namespace FacturaScripts\Core\Controller;
 
 use DateTime;
+use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Base\ToolBox;
 use FacturaScripts\Core\Contract\ControllerInterface;
 use FacturaScripts\Core\Plugins;
@@ -29,6 +30,8 @@ class Cron implements ControllerInterface
 
     public function __construct(string $url)
     {
+        $db = new DataBase();
+        $db->connect();
     }
 
     public function run(): void
