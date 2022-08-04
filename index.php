@@ -36,6 +36,12 @@ register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
 Setup::load(__DIR__);
 Session::init();
 
+// security headers
+header('X-Frame-Options: SAMEORIGIN');
+header('X-XSS-Protection: 1; mode=block');
+header('X-Content-Type-Options: nosniff');
+header('Strict-Transport-Security: max-age=31536000');
+
 // gets the url to serve and runs the kernel
 $url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 Kernel::run($url);
