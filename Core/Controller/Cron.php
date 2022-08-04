@@ -20,9 +20,9 @@
 namespace FacturaScripts\Core\Controller;
 
 use DateTime;
-use FacturaScripts\Core\Base\PluginManager;
 use FacturaScripts\Core\Base\ToolBox;
 use FacturaScripts\Core\Contract\ControllerInterface;
+use FacturaScripts\Core\Plugins;
 
 class Cron implements ControllerInterface
 {
@@ -50,16 +50,12 @@ END;
         $this->echo('starting-cron');
 
         // ejecutamos el cron de cada plugin
-        $manager = new PluginManager();
-        foreach ($manager->enabledPlugins() as $plugin) {
-            $cronClass = '\\FacturaScripts\\Plugins\\' . $plugin . '\\Cron';
-            if (false === class_exists($cronClass)) {
-                continue;
+        foreach (Plugins::enabled() as $plugin) {
+            $cron = Plugins::cron($plugin);
+            if ($cron) {
+                $this->echo('running-plugin-cron', ['%pluginName%' => $plugin]);
+                $cron->run();
             }
-
-            $this->echo('running-plugin-cron', ['%pluginName%' => $plugin]);
-            $cron = new $cronClass($plugin);
-            $cron->run();
         }
 
         $endTime = new DateTime();

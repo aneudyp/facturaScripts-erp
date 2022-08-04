@@ -20,6 +20,7 @@
 use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Cache;
 use FacturaScripts\Core\Controller\Cron;
+use FacturaScripts\Core\Plugins;
 use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
 
@@ -41,6 +42,14 @@ chdir(__DIR__);
 // set up the config and session
 Setup::load(__DIR__);
 Session::init();
+
+// run all plugins init
+foreach (Plugins::enabled() as $plugin) {
+    $init = Plugins::init($plugin);
+    if ($init) {
+        $init->init();
+    }
+}
 
 // run the cron controller
 $cron = new Cron('');

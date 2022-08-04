@@ -19,6 +19,7 @@
 
 use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Kernel;
+use FacturaScripts\Core\Plugins;
 use FacturaScripts\Core\Session;
 use FacturaScripts\Core\Setup;
 
@@ -36,6 +37,14 @@ register_shutdown_function('FacturaScripts\\Core\\Kernel::errorHandler');
 // set up the config and session
 Setup::load(__DIR__);
 Session::init();
+
+// run all plugins init
+foreach (Plugins::enabled() as $plugin) {
+    $init = Plugins::init($plugin);
+    if ($init) {
+        $init->init();
+    }
+}
 
 // security headers
 header('X-Frame-Options: SAMEORIGIN');
