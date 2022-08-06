@@ -24,6 +24,7 @@ use FacturaScripts\Core\Contract\ControllerInterface;
 use FacturaScripts\Core\DataSrc\Empresas;
 use FacturaScripts\Core\Html;
 use FacturaScripts\Core\KernelException;
+use FacturaScripts\Core\Session;
 use FacturaScripts\Dinamic\Lib\AssetManager;
 use FacturaScripts\Dinamic\Lib\MultiRequestProtection;
 use FacturaScripts\Dinamic\Model\Empresa;
@@ -284,12 +285,14 @@ class Controller implements ControllerInterface
         $this->updateCookies($user, $response);
         ToolBox::i18nLog()->debug('login-ok', ['%nick%' => $user->nick]);
         ToolBox::log()::setContext('nick', $user->nick);
+        Session::set('user', $user);
+        Session::set('page', $this->className);
 
         $menuManager = new MenuManager();
         $menuManager->setUser($user);
         $menuManager->selectPage($this->getPageData());
 
-        $permissions = new ControllerPermissions($user, $this->getClassName());
+        $permissions = new ControllerPermissions($user, $this->className);
         if (false === $permissions->allowAccess) {
             echo Html::render('Error/AccessDenied.html.twig', [
                 'fsc' => $this,
